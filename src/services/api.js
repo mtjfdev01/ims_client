@@ -36,6 +36,7 @@ const apiCall = async (endpoint, options = {}) => {
     headers: {
       'Content-Type': 'application/json',
     },
+    credentials: 'include',
     ...options,
   };
 
