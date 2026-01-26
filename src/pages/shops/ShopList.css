@@ -1,0 +1,53 @@
+.selected-shop-banner {
+  background-color: #4CAF50;
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.selected-shop-banner strong {
+  font-size: 16px;
+}
+
+.clear-shop-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.clear-shop-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.select-shop-btn {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.select-shop-btn:hover {
+  background-color: #1976D2;
+}
+
+.select-shop-btn.selected {
+  background-color: #4CAF50;
+  cursor: default;
+}
+
+.select-shop-btn.selected:hover {
+  background-color: #4CAF50;
+}
