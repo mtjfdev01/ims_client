@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://imsserver-production-8749.up.railway.app';
 
 export const authApi = {
   login: (data) => apiCall('/auth/login', { method: 'POST', body: data }),
