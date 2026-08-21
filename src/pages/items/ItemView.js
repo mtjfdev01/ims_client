@@ -31,22 +31,54 @@ const ItemView = () => {
     { 
       label: 'Quantity', 
       accessor: 'quantity',
-      render: (value) => value || 1
+      render: (value) => value ?? 0
     },
     { 
-      label: 'Purchase Price (per unit)', 
+      label: 'FIFO Cost (next out)', 
       accessor: 'purchasePrice',
       render: (value) => typeof value === 'string' ? `${parseFloat(value).toFixed(2)}` : `${value?.toFixed(2) || '0.00'}`
     },
     { 
-      label: 'Total Value', 
-      accessor: 'totalValue',
+      label: 'Stock Value (FIFO)', 
+      accessor: 'fifoValue',
       render: (value, row) => {
-        const qty = row.quantity || 1;
+        if (typeof value === 'number') {
+          return value.toFixed(2);
+        }
+        const qty = row.quantity ?? 0;
         const price = typeof row.purchasePrice === 'string' 
           ? parseFloat(row.purchasePrice) 
           : (row.purchasePrice || 0);
         return `${(qty * price).toFixed(2)}`;
+      }
+    },
+    { 
+      label: 'FIFO Lots', 
+      accessor: 'lots',
+      render: (lots) => {
+        if (!Array.isArray(lots) || lots.length === 0) {
+          return 'No remaining lots';
+        }
+        return (
+          <table className="sale-items-table">
+            <thead>
+              <tr>
+                <th>Received</th>
+                <th>Remaining</th>
+                <th>Unit Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lots.map((lot) => (
+                <tr key={lot.id}>
+                  <td>{lot.receivedAt ? new Date(lot.receivedAt).toLocaleDateString() : 'N/A'}</td>
+                  <td>{lot.remainingQuantity}</td>
+                  <td>{Number(lot.unitCost).toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
       }
     },
     { 

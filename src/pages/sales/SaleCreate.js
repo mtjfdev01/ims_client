@@ -55,6 +55,18 @@ const SaleCreate = () => {
           item.shop && userShopIds.includes(item.shop.id)
         );
       }
+
+      const selectedShopStr = localStorage.getItem('selectedShop');
+      if (selectedShopStr) {
+        try {
+          const selectedShop = JSON.parse(selectedShopStr);
+          if (selectedShop?.id) {
+            shopItems = shopItems.filter(item => item.shop && item.shop.id === selectedShop.id);
+          }
+        } catch (e) {
+          console.error('Error parsing selected shop from localStorage:', e);
+        }
+      }
       
       setItems(shopItems);
     } catch (error) {
@@ -246,10 +258,11 @@ const SaleCreate = () => {
                 <div className="item-info-box">
                   <div><strong>Item:</strong> {saleItem.selectedItem.name || `Item #${saleItem.selectedItem.id}`}</div>
                   <div><strong>Available Quantity:</strong> {saleItem.selectedItem.quantity}</div>
-                  <div><strong>Purchase Price (per unit):</strong> {typeof saleItem.selectedItem.purchasePrice === 'string' 
+                  <div><strong>FIFO Cost (next out):</strong> {typeof saleItem.selectedItem.purchasePrice === 'string' 
                     ? parseFloat(saleItem.selectedItem.purchasePrice).toFixed(2) 
                     : (saleItem.selectedItem.purchasePrice?.toFixed(2) || '0.00')}
                   </div>
+                  <div>Profit is estimated from FIFO cost and finalized on save.</div>
                 </div>
               )}
 

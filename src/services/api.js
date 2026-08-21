@@ -1,5 +1,7 @@
 const API_BASE_URL = 'https://imsserver-production-8749.up.railway.app';
 
+export const unwrapList = (data) => Array.isArray(data) ? data : (data?.data || []);
+
 export const authApi = {
   login: (data) => apiCall('/auth/login', { method: 'POST', body: data }),
 };
@@ -37,24 +39,28 @@ const apiCall = async (endpoint, options = {}) => {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    ...options,
+    method: options.method || 'GET',
   };
 
   if (options.body) {
     config.body = JSON.stringify(options.body);
   }
 
-  // Remove page and limit from config as they're in URL
-  delete config.page;
-  delete config.limit;
-
   const response = await fetch(url, config);
+  const text = await response.text();
+  let payload = null;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch (e) {
+    payload = { message: text };
+  }
   
   if (!response.ok) {
-    throw new Error(`API error: ${response.statusText}`);
+    const message = payload?.message || payload?.error || response.statusText;
+    throw new Error(Array.isArray(message) ? message.join(', ') : message);
   }
 
-  return response.json();
+  return payload;
 };
 
 const getUserId = () => {
@@ -157,10 +163,6 @@ export const companiesApi = {
 export const itemsApi = {
   getAll: (page, limit, filters) => {
     const options = { page, limit };
-    const shopId = getSelectedShopId();
-    if (shopId) {
-      options.shopId = shopId;
-    }
     if (filters) {
       options.filters = filters;
       if (filters.storeId) options.storeId = filters.storeId;

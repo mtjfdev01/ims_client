@@ -4,7 +4,7 @@ import Navigation from '../../components/Navigation';
 import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
-import { itemsApi, companiesApi, categoriesApi, storesApi, shopsApi } from '../../services/api';
+import { itemsApi, companiesApi, categoriesApi, storesApi, shopsApi, unwrapList } from '../../services/api';
 
 const ItemCreate = () => {
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ const ItemCreate = () => {
   const loadCompanies = async () => {
     try {
       const data = await companiesApi.getAll();
-      setCompanies(data);
+      setCompanies(unwrapList(data));
     } catch (error) {
       console.error('Error loading companies:', error);
     }
@@ -44,7 +44,7 @@ const ItemCreate = () => {
   const loadCategories = async () => {
     try {
       const data = await categoriesApi.getAll();
-      setCategories(data);
+      setCategories(unwrapList(data));
     } catch (error) {
       console.error('Error loading categories:', error);
     }
@@ -53,7 +53,7 @@ const ItemCreate = () => {
   const loadStores = async () => {
     try {
       const data = await storesApi.getAll();
-      setStores(Array.isArray(data) ? data : (data.data || []));
+      setStores(unwrapList(data));
     } catch (error) {
       console.error('Error loading stores:', error);
     }
@@ -62,7 +62,7 @@ const ItemCreate = () => {
   const loadShops = async () => {
     try {
       const data = await shopsApi.getAll();
-      setShops(Array.isArray(data) ? data : (data.data || []));
+      setShops(unwrapList(data));
     } catch (error) {
       console.error('Error loading shops:', error);
     }
@@ -92,10 +92,10 @@ const ItemCreate = () => {
         storeId: '' // Clear store when shop is selected
       });
     } else if (e.target.name === 'quantity') {
-      const value = parseInt(e.target.value) || 1;
+      const value = parseInt(e.target.value, 10);
       setFormData({
         ...formData,
-        quantity: value
+        quantity: Number.isNaN(value) ? 0 : value
       });
     } else {
       const value = e.target.type === 'number' ? parseFloat(e.target.value) : e.target.value;
@@ -132,7 +132,7 @@ const ItemCreate = () => {
         storeId: formData.storeId && formData.storeId !== '' ? parseInt(formData.storeId) : undefined,
         shopId: formData.shopId && formData.shopId !== '' ? parseInt(formData.shopId) : undefined,
         location: formData.location || '',
-        quantity: formData.quantity || 1,
+        quantity: formData.quantity ?? 0,
         purchasePrice: formData.purchasePrice || 0,
         minimumSalePrice: formData.minimumSalePrice || 0
       };

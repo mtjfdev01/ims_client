@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Input from './Input';
 import { authApi } from '../services/api';
@@ -12,6 +12,13 @@ const Auth = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      navigate('/home');
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({

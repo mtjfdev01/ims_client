@@ -32,10 +32,10 @@ const ItemList = () => {
     { 
       header: 'Quantity', 
       accessor: 'quantity',
-      render: (value) => value || 1
+      render: (value) => value ?? 0
     },
     { 
-      header: 'Purchase Price (per unit)', 
+      header: 'FIFO Cost (next out)', 
       accessor: 'purchasePrice',
       render: (value) => typeof value === 'string' ? `${parseFloat(value).toFixed(2)}` : `${value?.toFixed(2) || '0.00'}`
     },
@@ -43,7 +43,7 @@ const ItemList = () => {
       header: 'Total Value', 
       accessor: 'totalValue',
       render: (value, row) => {
-        const qty = row.quantity || 1;
+        const qty = row.quantity ?? 0;
         const price = typeof row.purchasePrice === 'string' 
           ? parseFloat(row.purchasePrice) 
           : (row.purchasePrice || 0);

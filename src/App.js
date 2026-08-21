@@ -65,6 +65,21 @@ import ExpenseEdit from './pages/expenses/ExpenseEdit';
 
 import './App.css';
 
+const isLoggedIn = () => {
+  try {
+    return !!JSON.parse(localStorage.getItem('user') || 'null');
+  } catch (e) {
+    return false;
+  }
+};
+
+const RequireAuth = ({ children }) => {
+  if (!isLoggedIn()) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
+
 function App() {
   return (
     <ShopProvider>
@@ -72,66 +87,66 @@ function App() {
         <div className="App">
           <Routes>
           <Route path="/" element={<Auth />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
           
           {/* Shops Routes */}
-          <Route path="/shops" element={<ShopList />} />
-          <Route path="/shops/create" element={<ShopCreate />} />
-          <Route path="/shops/:id" element={<ShopView />} />
-          <Route path="/shops/:id/edit" element={<ShopEdit />} />
-          <Route path="/shops/:id/items" element={<ShopItems />} />
-          <Route path="/shops/:id/sales" element={<ShopSales />} />
-          <Route path="/shops/:id/expenses" element={<ShopExpenses />} />
+          <Route path="/shops" element={<RequireAuth><ShopList /></RequireAuth>} />
+          <Route path="/shops/create" element={<RequireAuth><ShopCreate /></RequireAuth>} />
+          <Route path="/shops/:id" element={<RequireAuth><ShopView /></RequireAuth>} />
+          <Route path="/shops/:id/edit" element={<RequireAuth><ShopEdit /></RequireAuth>} />
+          <Route path="/shops/:id/items" element={<RequireAuth><ShopItems /></RequireAuth>} />
+          <Route path="/shops/:id/sales" element={<RequireAuth><ShopSales /></RequireAuth>} />
+          <Route path="/shops/:id/expenses" element={<RequireAuth><ShopExpenses /></RequireAuth>} />
           
           {/* Stores Routes */}
-          <Route path="/stores" element={<StoreList />} />
-          <Route path="/stores/create" element={<StoreCreate />} />
-          <Route path="/stores/:id" element={<StoreView />} />
-          <Route path="/stores/:id/edit" element={<StoreEdit />} />
-          <Route path="/stores/:id/items" element={<StoreItems />} />
+          <Route path="/stores" element={<RequireAuth><StoreList /></RequireAuth>} />
+          <Route path="/stores/create" element={<RequireAuth><StoreCreate /></RequireAuth>} />
+          <Route path="/stores/:id" element={<RequireAuth><StoreView /></RequireAuth>} />
+          <Route path="/stores/:id/edit" element={<RequireAuth><StoreEdit /></RequireAuth>} />
+          <Route path="/stores/:id/items" element={<RequireAuth><StoreItems /></RequireAuth>} />
           
           {/* Categories Routes */}
-          <Route path="/categories" element={<CategoryList />} />
-          <Route path="/categories/create" element={<CategoryCreate />} />
-          <Route path="/categories/:id" element={<CategoryView />} />
-          <Route path="/categories/:id/edit" element={<CategoryEdit />} />
+          <Route path="/categories" element={<RequireAuth><CategoryList /></RequireAuth>} />
+          <Route path="/categories/create" element={<RequireAuth><CategoryCreate /></RequireAuth>} />
+          <Route path="/categories/:id" element={<RequireAuth><CategoryView /></RequireAuth>} />
+          <Route path="/categories/:id/edit" element={<RequireAuth><CategoryEdit /></RequireAuth>} />
           
           {/* Companies Routes */}
-          <Route path="/companies" element={<CompanyList />} />
-          <Route path="/companies/create" element={<CompanyCreate />} />
-          <Route path="/companies/:id" element={<CompanyView />} />
-          <Route path="/companies/:id/edit" element={<CompanyEdit />} />
+          <Route path="/companies" element={<RequireAuth><CompanyList /></RequireAuth>} />
+          <Route path="/companies/create" element={<RequireAuth><CompanyCreate /></RequireAuth>} />
+          <Route path="/companies/:id" element={<RequireAuth><CompanyView /></RequireAuth>} />
+          <Route path="/companies/:id/edit" element={<RequireAuth><CompanyEdit /></RequireAuth>} />
           
           {/* Items Routes */}
-          <Route path="/items" element={<ItemList />} />
-          <Route path="/items/create" element={<ItemCreate />} />
-          <Route path="/items/:id" element={<ItemView />} />
-          <Route path="/items/:id/edit" element={<ItemEdit />} />
-          <Route path="/items/transfer" element={<TransferItem />} />
+          <Route path="/items" element={<RequireAuth><ItemList /></RequireAuth>} />
+          <Route path="/items/create" element={<RequireAuth><ItemCreate /></RequireAuth>} />
+          <Route path="/items/:id" element={<RequireAuth><ItemView /></RequireAuth>} />
+          <Route path="/items/:id/edit" element={<RequireAuth><ItemEdit /></RequireAuth>} />
+          <Route path="/items/transfer" element={<RequireAuth><TransferItem /></RequireAuth>} />
           
           {/* Sales Routes */}
-          <Route path="/sales" element={<SaleList />} />
-          <Route path="/sales/create" element={<SaleCreate />} />
-          <Route path="/sales/:id" element={<SaleView />} />
-          <Route path="/sales/:id/edit" element={<SaleEdit />} />
+          <Route path="/sales" element={<RequireAuth><SaleList /></RequireAuth>} />
+          <Route path="/sales/create" element={<RequireAuth><SaleCreate /></RequireAuth>} />
+          <Route path="/sales/:id" element={<RequireAuth><SaleView /></RequireAuth>} />
+          <Route path="/sales/:id/edit" element={<RequireAuth><SaleEdit /></RequireAuth>} />
           
           {/* Orders Routes */}
-          <Route path="/orders" element={<OrderList />} />
-          <Route path="/orders/create" element={<OrderCreate />} />
-          <Route path="/orders/:id" element={<OrderView />} />
-          <Route path="/orders/:id/edit" element={<OrderEdit />} />
+          <Route path="/orders" element={<RequireAuth><OrderList /></RequireAuth>} />
+          <Route path="/orders/create" element={<RequireAuth><OrderCreate /></RequireAuth>} />
+          <Route path="/orders/:id" element={<RequireAuth><OrderView /></RequireAuth>} />
+          <Route path="/orders/:id/edit" element={<RequireAuth><OrderEdit /></RequireAuth>} />
           
           {/* Purchases Routes */}
-          <Route path="/purchases" element={<PurchaseList />} />
-          <Route path="/purchases/create" element={<PurchaseCreate />} />
-          <Route path="/purchases/:id" element={<PurchaseView />} />
-          <Route path="/purchases/:id/edit" element={<PurchaseEdit />} />
+          <Route path="/purchases" element={<RequireAuth><PurchaseList /></RequireAuth>} />
+          <Route path="/purchases/create" element={<RequireAuth><PurchaseCreate /></RequireAuth>} />
+          <Route path="/purchases/:id" element={<RequireAuth><PurchaseView /></RequireAuth>} />
+          <Route path="/purchases/:id/edit" element={<RequireAuth><PurchaseEdit /></RequireAuth>} />
           
           {/* Expenses Routes */}
-          <Route path="/expenses" element={<ExpenseList />} />
-          <Route path="/expenses/create" element={<ExpenseCreate />} />
-          <Route path="/expenses/:id" element={<ExpenseView />} />
-          <Route path="/expenses/:id/edit" element={<ExpenseEdit />} />
+          <Route path="/expenses" element={<RequireAuth><ExpenseList /></RequireAuth>} />
+          <Route path="/expenses/create" element={<RequireAuth><ExpenseCreate /></RequireAuth>} />
+          <Route path="/expenses/:id" element={<RequireAuth><ExpenseView /></RequireAuth>} />
+          <Route path="/expenses/:id/edit" element={<RequireAuth><ExpenseEdit /></RequireAuth>} />
           
           <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

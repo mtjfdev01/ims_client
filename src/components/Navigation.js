@@ -60,6 +60,7 @@ const Navigation = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('selectedShop');
     setUser(null);
     navigate('/');
     closeMenu();
