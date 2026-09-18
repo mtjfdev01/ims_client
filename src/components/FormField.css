@@ -12,6 +12,11 @@
   flex-shrink: 0;
 }
 
+.required-asterisk {
+  color: #d32f2f;
+  font-weight: 700;
+}
+
 .form-field-input {
   flex: 1;
 }

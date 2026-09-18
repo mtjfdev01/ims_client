@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navigation from '../../components/Navigation';
 import FormWrapper from '../../components/FormWrapper';
+import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import { itemsApi, storesApi, shopsApi } from '../../services/api';
 import '../FormPage.css';
@@ -182,14 +183,18 @@ const TransferItem = () => {
             <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
               <strong>From Store:</strong> {stores.find(s => s.id === parseInt(formData.fromStoreId))?.name || 'N/A'}
             </div>
-            <Input
-              type="dropdown"
-              name="toShopId"
-              placeholder="Select Destination Shop"
-              value={formData.toShopId}
-              onChange={handleChange}
-              options={shopOptions}
-            />
+            <FormField label="Destination Shop" htmlFor="toShopId" required>
+              <Input
+                type="dropdown"
+                id="toShopId"
+                name="toShopId"
+                placeholder="Select Destination Shop"
+                value={formData.toShopId}
+                onChange={handleChange}
+                options={shopOptions}
+                required
+              />
+            </FormField>
           </>
         )}
 
@@ -198,39 +203,50 @@ const TransferItem = () => {
             <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
               <strong>From Shop:</strong> {shops.find(s => s.id === parseInt(formData.fromShopId))?.name || 'N/A'}
             </div>
-            <Input
-              type="dropdown"
-              name="toStoreId"
-              placeholder="Select Destination Store"
-              value={formData.toStoreId}
-              onChange={handleChange}
-              options={storeOptions}
-            />
+            <FormField label="Destination Store" htmlFor="toStoreId" required>
+              <Input
+                type="dropdown"
+                id="toStoreId"
+                name="toStoreId"
+                placeholder="Select Destination Store"
+                value={formData.toStoreId}
+                onChange={handleChange}
+                options={storeOptions}
+                required
+              />
+            </FormField>
           </>
         )}
 
-        <Input
-          type="number"
-          name="quantity"
-          placeholder="Quantity to Transfer"
-          value={formData.quantity}
-          onChange={handleChange}
-          min="1"
-          max={itemData?.quantity || 1}
-        />
+        <FormField label="Quantity" htmlFor="quantity" required>
+          <Input
+            type="number"
+            id="quantity"
+            name="quantity"
+            placeholder="Quantity to Transfer"
+            value={formData.quantity}
+            onChange={handleChange}
+            min="1"
+            max={itemData?.quantity || 1}
+            required
+          />
+        </FormField>
         {itemData && (
           <div style={{ marginTop: '-10px', marginBottom: '15px', fontSize: '12px', color: '#666' }}>
             Maximum: {itemData.quantity} units
           </div>
         )}
 
-        <Input
-          type="text"
-          name="notes"
-          placeholder="Notes (optional)"
-          value={formData.notes}
-          onChange={handleChange}
-        />
+        <FormField label="Notes (optional)" htmlFor="notes">
+          <Input
+            type="text"
+            id="notes"
+            name="notes"
+            placeholder="Notes (optional)"
+            value={formData.notes}
+            onChange={handleChange}
+          />
+        </FormField>
         
         <div className="form-actions">
           <button 

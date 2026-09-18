@@ -115,7 +115,7 @@ const PurchaseEdit = () => {
       <Navigation />
       <FormWrapper title="Edit Purchase" onSubmit={handleSubmit}>
         <div className="form-fields-row">
-          <FormField label="Item" htmlFor="itemId">
+          <FormField label="Item" htmlFor="itemId" required>
             <Input
               type="dropdown"
               name="itemId"
@@ -125,7 +125,7 @@ const PurchaseEdit = () => {
               options={itemOptions}
             />
           </FormField>
-          <FormField label="Purchase Price (per unit)" htmlFor="purchasePrice">
+          <FormField label="Purchase Price (per unit)" htmlFor="purchasePrice" required>
             <Input
               type="number"
               name="purchasePrice"
@@ -136,7 +136,7 @@ const PurchaseEdit = () => {
               min="0"
             />
           </FormField>
-          <FormField label="Quantity" htmlFor="quantity">
+          <FormField label="Quantity" htmlFor="quantity" required>
             <Input
               type="number"
               name="quantity"
@@ -148,7 +148,7 @@ const PurchaseEdit = () => {
           </FormField>
         </div>
         <div className="form-fields-row">
-          <FormField label="Purchase Date" htmlFor="purchaseDate">
+          <FormField label="Purchase Date" htmlFor="purchaseDate" required>
             <Input
               type="date"
               name="purchaseDate"

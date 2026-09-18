@@ -65,7 +65,7 @@ const ExpenseEdit = () => {
       <Navigation />
       <FormWrapper title="Edit Expense" onSubmit={handleSubmit}>
         <div className="form-fields-row">
-          <FormField label="Description" htmlFor="description">
+          <FormField label="Description" htmlFor="description" required>
             <Input
               type="text"
               name="description"
@@ -74,7 +74,7 @@ const ExpenseEdit = () => {
               onChange={handleChange}
             />
           </FormField>
-          <FormField label="Price" htmlFor="price">
+          <FormField label="Price" htmlFor="price" required>
             <Input
               type="number"
               name="price"

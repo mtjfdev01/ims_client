@@ -4,7 +4,9 @@ import Navigation from '../../components/Navigation';
 import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
+import OrganizationField from '../../components/OrganizationField';
 import { shopsApi, storesApi } from '../../services/api';
+import { getUser, isSuperAdmin, setViewTenantId, updateStoredUser } from '../../services/session';
 import '../FormPage.css';
 
 const ShopCreate = () => {
@@ -14,10 +16,14 @@ const ShopCreate = () => {
     branch: '',
     dealer: '',
     location: '',
-    storeIds: []
+    storeIds: [],
+    orgMode: 'new',
+    tenantId: '',
+    tenantName: '',
   });
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   React.useEffect(() => {
     loadStores();
@@ -56,12 +62,39 @@ const ShopCreate = () => {
     if (loading) return; // Prevent multiple submissions
     
     setLoading(true);
+    setError('');
     try {
-      await shopsApi.create(formData);
+      const payload = {
+        name: formData.name,
+        branch: formData.branch,
+        dealer: formData.dealer,
+        location: formData.location,
+        storeIds: formData.storeIds,
+      };
+      if (isSuperAdmin()) {
+        if (formData.orgMode === 'new') {
+          payload.tenantName = formData.tenantName.trim();
+        } else if (formData.tenantId) {
+          payload.tenantId = Number(formData.tenantId);
+        }
+      }
+      const shop = await shopsApi.create(payload);
+      if (shop?.tenant?.id) {
+        setViewTenantId(shop.tenant.id);
+      } else if (payload.tenantId) {
+        setViewTenantId(payload.tenantId);
+      }
+      const user = getUser();
+      if (user && !isSuperAdmin(user) && shop?.id) {
+        updateStoredUser({
+          ...user,
+          shops: [...(user.shops || []).filter(existing => existing.id !== shop.id), { id: shop.id, name: shop.name }],
+        });
+      }
       navigate('/shops');
-    } catch (error) {
-      console.error('Error creating shop:', error);
-      alert('Failed to create shop');
+    } catch (err) {
+      console.error('Error creating shop:', err);
+      setError(err.message || 'Failed to create shop');
       setLoading(false);
     }
   };
@@ -70,8 +103,15 @@ const ShopCreate = () => {
     <div>
       <Navigation />
       <FormWrapper title="Create Shop" onSubmit={handleSubmit}>
+        {error && <div className="form-error">{error}</div>}
+        <OrganizationField
+          orgMode={formData.orgMode}
+          tenantId={formData.tenantId}
+          tenantName={formData.tenantName}
+          onChange={handleChange}
+        />
         <div className="form-fields-row">
-          <FormField label="Name" htmlFor="name">
+          <FormField label="Name" htmlFor="name" required>
             <Input
               type="text"
               name="name"
@@ -80,7 +120,7 @@ const ShopCreate = () => {
               onChange={handleChange}
             />
           </FormField>
-          <FormField label="Branch" htmlFor="branch">
+          <FormField label="Branch" htmlFor="branch" required>
             <Input
               type="text"
               name="branch"
@@ -91,7 +131,7 @@ const ShopCreate = () => {
           </FormField>
         </div>
         <div className="form-fields-row">
-          <FormField label="Dealer" htmlFor="dealer">
+          <FormField label="Dealer" htmlFor="dealer" required>
             <Input
               type="text"
               name="dealer"
@@ -100,7 +140,7 @@ const ShopCreate = () => {
               onChange={handleChange}
             />
           </FormField>
-          <FormField label="Location" htmlFor="location">
+          <FormField label="Location" htmlFor="location" required>
             <Input
               type="text"
               name="location"

@@ -1,11 +1,17 @@
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import Listing from '../../components/Listing';
 import { shopsApi } from '../../services/api';
 import { useShop } from '../../contexts/ShopContext';
+import { hasSingleAssignedShop, isSuperAdmin } from '../../services/session';
 import './ShopList.css';
 
 const ShopList = () => {
   const { selectedShop, selectShop, clearShop } = useShop();
+
+  if (hasSingleAssignedShop()) {
+    return <Navigate to="/items" replace />;
+  }
 
   const columns = [
     { header: 'Name', accessor: 'name' },
@@ -39,7 +45,9 @@ const ShopList = () => {
         columns={columns}
         fetchData={shopsApi.getAll}
         basePath="/shops"
-        onDelete={shopsApi.delete}
+        onDelete={isSuperAdmin() ? shopsApi.delete : undefined}
+        writePermission="shops.write"
+        deletePermission="shops.delete"
         showFilters={false}
       />
     </div>

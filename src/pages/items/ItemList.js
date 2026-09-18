@@ -2,8 +2,15 @@ import React from 'react';
 import Listing from '../../components/Listing';
 import ItemFilterPanel from './ItemFilterPanel';
 import { itemsApi } from '../../services/api';
+import { useShop } from '../../contexts/ShopContext';
+import { getAssignedShops, getUser, isSuperAdmin, isTenantAdmin } from '../../services/session';
 
 const ItemList = () => {
+  const { selectedShop } = useShop();
+  const user = getUser();
+  const canSeeAllTypes = isSuperAdmin(user) || isTenantAdmin(user);
+  const showShopOption = canSeeAllTypes || !!selectedShop || getAssignedShops(user).length > 0;
+  const showStoreOption = canSeeAllTypes;
   const columns = [
     { header: 'Name', accessor: 'name' },
     { 
@@ -64,11 +71,15 @@ const ItemList = () => {
       fetchData={itemsApi.getAll}
       basePath="/items"
       onDelete={itemsApi.delete}
+      writePermission="items.write"
+      deletePermission="items.delete"
       renderFilters={(handleFilterChange, currentFilters) => (
         <ItemFilterPanel 
           onFilterChange={handleFilterChange}
-          onClear={() => handleFilterChange({ filterType: '', search: '' })}
+          onClear={() => handleFilterChange({ filterType: '', search: '', date: '', dateFrom: '', dateTo: '' })}
           currentFilters={currentFilters}
+          showStoreOption={showStoreOption}
+          showShopOption={showShopOption}
         />
       )}
     />

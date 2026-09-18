@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Input from './Input';
 import { authApi } from '../services/api';
+import { defaultHomePath, isAuthenticated, saveSession } from '../services/session';
 import './Auth.css';
 
 const Auth = () => {
@@ -14,9 +15,8 @@ const Auth = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      navigate('/home');
+    if (isAuthenticated()) {
+      navigate(defaultHomePath());
     }
   }, [navigate]);
 
@@ -36,10 +36,9 @@ const Auth = () => {
     try {
       const response = await authApi.login(formData);
       
-      if (response.user) {
-        // Store user data in localStorage
-        localStorage.setItem('user', JSON.stringify(response.user));
-        navigate('/home');
+      if (response.token && response.user) {
+        saveSession(response.token, response.user);
+        navigate(defaultHomePath(response.user));
       } else {
         setError('Invalid email or password');
       }
@@ -55,19 +54,29 @@ const Auth = () => {
       <div className="auth-box">
         <h2>Login</h2>
         <form onSubmit={handleSubmit}>
+          <label className="auth-label" htmlFor="email">
+            Email <span className="required-asterisk">*</span>
+          </label>
           <Input
             type="email"
+            id="email"
             name="email"
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
+            required
           />
+          <label className="auth-label" htmlFor="password">
+            Password <span className="required-asterisk">*</span>
+          </label>
           <Input
             type="password"
+            id="password"
             name="password"
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
+            required
           />
           {error && <div className="auth-error">{error}</div>}
           <button type="submit" className="auth-button" disabled={loading}>

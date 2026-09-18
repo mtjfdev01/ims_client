@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import './FilterPanel.css';
 
-const FilterPanel = ({ onFilterChange, onClear }) => {
+const FilterPanel = ({ onFilterChange, onApplyFilters, onClear }) => {
+  const applyFilters = onFilterChange || onApplyFilters;
   const [filters, setFilters] = useState({
     date: '',
     dateFrom: '',
@@ -27,7 +28,9 @@ const FilterPanel = ({ onFilterChange, onClear }) => {
     }
     
     setFilters(newFilters);
-    onFilterChange(newFilters);
+    if (applyFilters) {
+      applyFilters(newFilters);
+    }
   };
 
   const handleClear = () => {
@@ -38,7 +41,11 @@ const FilterPanel = ({ onFilterChange, onClear }) => {
       search: ''
     };
     setFilters(clearedFilters);
-    onClear();
+    if (onClear) {
+      onClear();
+    } else if (applyFilters) {
+      applyFilters(clearedFilters);
+    }
   };
 
   return (

@@ -287,7 +287,7 @@ const OrderEdit = () => {
       <Navigation />
       <FormWrapper title="Edit Order" onSubmit={handleSubmit}>
         <div className="form-fields-row">
-          <FormField label="Status" htmlFor="status">
+          <FormField label="Status" htmlFor="status" required>
             <Input
               type="dropdown"
               name="status"
@@ -329,7 +329,7 @@ const OrderEdit = () => {
                 </div>
 
                 <div className="form-fields-row">
-                  <FormField label="Item" htmlFor={`item-${index}`}>
+                  <FormField label="Item" htmlFor={`item-${index}`} required>
                     <Input
                       type="dropdown"
                       name="itemId"
@@ -339,7 +339,7 @@ const OrderEdit = () => {
                       options={itemOptions}
                     />
                   </FormField>
-                  <FormField label="Quantity" htmlFor={`quantity-${index}`}>
+                  <FormField label="Quantity" htmlFor={`quantity-${index}`} required>
                     <Input
                       type="number"
                       name="quantity"

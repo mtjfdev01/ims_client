@@ -8,7 +8,9 @@ const CompanyView = () => {
     { 
       label: 'Categories', 
       accessor: 'categories',
-      render: (value) => Array.isArray(value) ? value.join(', ') : value
+      render: (value) => Array.isArray(value) && value.length > 0
+        ? value.map(c => c.name || c).join(', ')
+        : '—'
     },
   ];
 

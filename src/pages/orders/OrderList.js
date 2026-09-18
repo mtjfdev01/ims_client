@@ -51,6 +51,8 @@ const OrderList = () => {
       fetchData={ordersApi.getAll}
       basePath="/orders"
       onDelete={ordersApi.delete}
+      writePermission="orders.write"
+      deletePermission="orders.delete"
       renderFilters={(handleApplyFilters) => (
         <FilterPanel onApplyFilters={handleApplyFilters} />
       )}

@@ -6,23 +6,29 @@
   position: sticky;
   top: 0;
   z-index: 1000;
+  width: 100%;
+  overflow: visible;
 }
 
 .nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 12px;
+  gap: 8px;
+  box-sizing: border-box;
   position: relative;
 }
 
 .nav-logo {
   margin: 0;
-  padding: 15px 20px;
-  font-size: 24px;
+  padding: 12px 8px;
+  font-size: 20px;
   color: white;
-  flex: 1;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .nav-toggle {
@@ -33,6 +39,7 @@
   cursor: pointer;
   padding: 10px;
   gap: 5px;
+  margin-left: auto;
 }
 
 .hamburger {
@@ -46,21 +53,27 @@
 .nav-menu {
   list-style: none;
   display: flex;
+  align-items: center;
   margin: 0;
   padding: 0;
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
 }
 
 .nav-menu li {
   margin: 0;
+  flex: 0 0 auto;
 }
 
 .nav-menu a {
   display: block;
-  padding: 15px 20px;
+  padding: 14px 10px;
   color: white;
   text-decoration: none;
   transition: background-color 0.3s;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .nav-menu a:hover,
@@ -69,17 +82,41 @@
 }
 
 .nav-auth {
-  margin-left: auto;
+  margin-left: 0;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 6px 0;
 }
 
-.nav-user-info {
+.nav-user-info,
+.nav-shop-info {
   color: white;
-  padding: 15px 10px;
-  font-size: 14px;
+  padding: 0;
+  font-size: 13px;
   white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-shop-info {
+  text-decoration: none;
+  background-color: #4CAF50;
+  border-radius: 4px;
+  padding: 6px 10px;
+  max-width: 140px;
+}
+
+.nav-tenant-select {
+  background-color: #444;
+  color: white;
+  border: 1px solid #666;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 13px;
+  max-width: 170px;
 }
 
 .nav-login-btn,
@@ -87,10 +124,10 @@
   background-color: #4CAF50;
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 8px 14px;
   cursor: pointer;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 13px;
   transition: background-color 0.3s;
   white-space: nowrap;
 }
@@ -108,10 +145,14 @@
   background-color: #da190b;
 }
 
-/* Mobile Styles */
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .nav-toggle {
     display: flex;
+    order: 3;
+  }
+
+  .nav-auth {
+    order: 2;
   }
 
   .nav-menu {
@@ -119,17 +160,20 @@
     top: 100%;
     left: 0;
     right: 0;
+    z-index: 1100;
     background-color: #333;
     flex-direction: column;
+    align-items: stretch;
     max-height: 0;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
     transition: max-height 0.3s ease-out;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
   .nav-menu.active {
-    max-height: 500px;
-    transition: max-height 0.3s ease-in;
+    max-height: 80vh;
+    overflow-y: auto;
   }
 
   .nav-menu li {
@@ -138,29 +182,15 @@
   }
 
   .nav-menu a {
-    padding: 15px 20px;
+    padding: 14px 20px;
     width: 100%;
+    font-size: 14px;
+    box-sizing: border-box;
   }
 
-  .nav-auth {
-    margin-left: 0;
-    flex-direction: column;
-    width: 100%;
-    border-top: 1px solid #444;
-    padding: 10px 0;
-  }
-
-  .nav-user-info {
-    padding: 10px 20px;
-    width: 100%;
-    text-align: center;
-  }
-
-  .nav-login-btn,
-  .nav-logout-btn {
-    width: calc(100% - 40px);
-    margin: 0 20px;
-    padding: 12px 20px;
+  .nav-user-info,
+  .nav-shop-info {
+    display: none;
   }
 
   .hamburger.open:nth-child(1) {
@@ -176,33 +206,24 @@
   }
 }
 
-/* Tablet Styles */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .nav-menu a {
-    padding: 15px 15px;
-    font-size: 14px;
-  }
-
-  .nav-logo {
-    font-size: 20px;
-    padding: 15px 15px;
-  }
-}
-
-/* Small Mobile Styles */
 @media (max-width: 480px) {
   .nav-container {
-    padding: 0 10px;
+    padding: 0 8px;
   }
 
   .nav-logo {
-    font-size: 20px;
-    padding: 15px 10px;
+    font-size: 18px;
+    padding: 12px 4px;
   }
 
-  .nav-menu a {
-    padding: 12px 15px;
-    font-size: 14px;
+  .nav-tenant-select {
+    max-width: 120px;
+    font-size: 12px;
+  }
+
+  .nav-logout-btn,
+  .nav-login-btn {
+    padding: 8px 10px;
+    font-size: 12px;
   }
 }
-

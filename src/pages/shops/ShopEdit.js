@@ -91,7 +91,7 @@ const ShopEdit = () => {
       <Navigation />
       <FormWrapper title="Edit Shop" onSubmit={handleSubmit}>
         <div className="form-fields-row">
-          <FormField label="Name" htmlFor="name">
+          <FormField label="Name" htmlFor="name" required>
             <Input
               type="text"
               name="name"
@@ -100,7 +100,7 @@ const ShopEdit = () => {
               onChange={handleChange}
             />
           </FormField>
-          <FormField label="Branch" htmlFor="branch">
+          <FormField label="Branch" htmlFor="branch" required>
             <Input
               type="text"
               name="branch"
@@ -111,7 +111,7 @@ const ShopEdit = () => {
           </FormField>
         </div>
         <div className="form-fields-row">
-          <FormField label="Dealer" htmlFor="dealer">
+          <FormField label="Dealer" htmlFor="dealer" required>
             <Input
               type="text"
               name="dealer"
@@ -120,7 +120,7 @@ const ShopEdit = () => {
               onChange={handleChange}
             />
           </FormField>
-          <FormField label="Location" htmlFor="location">
+          <FormField label="Location" htmlFor="location" required>
             <Input
               type="text"
               name="location"

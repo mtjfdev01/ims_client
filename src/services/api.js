@@ -1,9 +1,15 @@
-const API_BASE_URL = 'https://imsserver-production-8749.up.railway.app';
+import { clearSession, getToken, getViewTenantId } from './session';
+
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL ||
+  (process.env.NODE_ENV === 'development'
+    ? 'http://localhost:3668'
+    : 'https://imsserver-production-8749.up.railway.app');
 
 export const unwrapList = (data) => Array.isArray(data) ? data : (data?.data || []);
 
 export const authApi = {
-  login: (data) => apiCall('/auth/login', { method: 'POST', body: data }),
+  login: (data) => apiCall('/auth/login', { method: 'POST', body: data, public: true }),
 };
 
 const apiCall = async (endpoint, options = {}) => {
@@ -21,23 +27,35 @@ const apiCall = async (endpoint, options = {}) => {
     if (options.filters.dateTo) params.append('dateTo', options.filters.dateTo);
     if (options.filters.search && options.filters.search.trim()) params.append('search', options.filters.search.trim());
     if (options.filters.filterType && options.filters.filterType.trim()) params.append('filterType', options.filters.filterType.trim());
+    if (options.filters.tenantId) params.append('tenantId', options.filters.tenantId);
   }
   
-  // Add other filter options (like storeId, shopId, itemId, filterType, userId)
   if (options.storeId) params.append('storeId', options.storeId);
   if (options.shopId) params.append('shopId', options.shopId);
   if (options.itemId) params.append('itemId', options.itemId);
-  if (options.filterType && options.filterType.trim()) params.append('filterType', options.filterType.trim());
-  if (options.userId) params.append('userId', options.userId);
+  if (options.filterType && options.filterType.trim() && !params.has('filterType')) {
+    params.append('filterType', options.filterType.trim());
+  }
+  if (options.tenantId) params.append('tenantId', options.tenantId);
   
   if (params.toString()) {
     url += `?${params.toString()}`;
   }
+
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  const token = getToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  const tenantId = options.tenantId || options.filters?.tenantId || getViewTenantId();
+  if (tenantId) {
+    headers['X-Tenant-Id'] = String(tenantId);
+  }
   
   const config = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     credentials: 'include',
     method: options.method || 'GET',
   };
@@ -54,6 +72,14 @@ const apiCall = async (endpoint, options = {}) => {
   } catch (e) {
     payload = { message: text };
   }
+
+  if (response.status === 401 && !options.public) {
+    clearSession();
+    if (window.location.pathname !== '/') {
+      window.location.assign('/');
+    }
+    throw new Error('Session expired. Please log in again.');
+  }
   
   if (!response.ok) {
     const message = payload?.message || payload?.error || response.statusText;
@@ -61,19 +87,6 @@ const apiCall = async (endpoint, options = {}) => {
   }
 
   return payload;
-};
-
-const getUserId = () => {
-  const userStr = localStorage.getItem('user');
-  if (userStr) {
-    try {
-      const user = JSON.parse(userStr);
-      return user.id;
-    } catch (e) {
-      console.error('Error parsing user from localStorage:', e);
-    }
-  }
-  return null;
 };
 
 const getSelectedShopId = () => {
@@ -89,49 +102,32 @@ const getSelectedShopId = () => {
   return null;
 };
 
+const resolveShopId = (filters) => {
+  if (filters?.shopId) {
+    return Number(filters.shopId);
+  }
+  return getSelectedShopId();
+};
+
 export const shopsApi = {
-  getAll: (page, limit, filters) => {
-    const options = { page, limit, filters };
-    const userId = getUserId();
-    if (userId) {
-      options.userId = userId;
-    }
-    return apiCall('/shops', options);
-  },
-  getOne: (id) => {
-    const options = {};
-    const userId = getUserId();
-    if (userId) {
-      options.userId = userId;
-    }
-    return apiCall(`/shops/${id}`, options);
-  },
-  getItems: (id) => {
-    const options = {};
-    const userId = getUserId();
-    if (userId) {
-      options.userId = userId;
-    }
-    return apiCall(`/shops/${id}/items`, options);
-  },
-  getAssetValue: (id) => {
-    const options = {};
-    const userId = getUserId();
-    if (userId) {
-      options.userId = userId;
-    }
-    return apiCall(`/shops/${id}/asset-value`, options);
-  },
-  create: (data) => {
-    const options = { method: 'POST', body: data };
-    const userId = getUserId();
-    if (userId) {
-      options.userId = userId;
-    }
-    return apiCall('/shops', options);
-  },
+  getAll: (page, limit, filters) => apiCall('/shops', { page, limit, filters, tenantId: filters?.tenantId }),
+  getOne: (id) => apiCall(`/shops/${id}`),
+  getItems: (id) => apiCall(`/shops/${id}/items`),
+  getAssetValue: (id) => apiCall(`/shops/${id}/asset-value`),
+  create: (data) => apiCall('/shops', { method: 'POST', body: data }),
   update: (id, data) => apiCall(`/shops/${id}`, { method: 'PATCH', body: data }),
   delete: (id) => apiCall(`/shops/${id}`, { method: 'DELETE' }),
+};
+
+export const usersApi = {
+  getAll: () => apiCall('/users'),
+  getTenants: () => apiCall('/users/tenants'),
+  create: (data) => apiCall('/users', { method: 'POST', body: data }),
+  assignShops: (id, shopIds) => apiCall(`/users/${id}/shops`, { method: 'PATCH', body: { shopIds } }),
+  assignRole: (id, role) => apiCall(`/users/${id}/role`, { method: 'PATCH', body: { role } }),
+  resetPassword: (id, password) => apiCall(`/users/${id}/password`, { method: 'PATCH', body: { password } }),
+  revealPassword: (id) => apiCall(`/users/${id}/password`),
+  archive: (id) => apiCall(`/users/${id}`, { method: 'DELETE' }),
 };
 
 export const storesApi = {
@@ -167,14 +163,13 @@ export const itemsApi = {
       options.filters = filters;
       if (filters.storeId) options.storeId = filters.storeId;
       if (filters.shopId) options.shopId = filters.shopId;
-      if (filters.filterType) options.filterType = filters.filterType;
     }
     return apiCall('/items', options);
   },
   getOne: (id) => apiCall(`/items/${id}`),
   create: (data) => {
     const shopId = getSelectedShopId();
-    if (shopId && !data.shopId) {
+    if (shopId && !data.shopId && !data.storeId) {
       data.shopId = shopId;
     }
     return apiCall('/items', { method: 'POST', body: data });
@@ -187,7 +182,7 @@ export const itemsApi = {
 export const salesApi = {
   getAll: (page, limit, filters) => {
     const options = { page, limit, filters };
-    const shopId = getSelectedShopId();
+    const shopId = resolveShopId(filters);
     if (shopId) {
       options.shopId = shopId;
     }
@@ -196,8 +191,7 @@ export const salesApi = {
   getOne: (id) => apiCall(`/sales/${id}`),
   getTotals: (filters, shopId) => {
     const options = { filters };
-    const selectedShopId = getSelectedShopId();
-    options.shopId = shopId || selectedShopId;
+    options.shopId = shopId ?? resolveShopId(filters);
     return apiCall('/sales/totals', options);
   },
   create: (data) => {
@@ -214,7 +208,7 @@ export const salesApi = {
 export const ordersApi = {
   getAll: (page, limit, filters) => {
     const options = { page, limit, filters };
-    const shopId = getSelectedShopId();
+    const shopId = resolveShopId(filters);
     if (shopId) {
       options.shopId = shopId;
     }
@@ -239,7 +233,7 @@ export const ordersApi = {
 export const purchasesApi = {
   getAll: (page, limit, filters) => {
     const options = { page, limit, filters: {} };
-    const shopId = getSelectedShopId();
+    const shopId = resolveShopId(filters);
     if (shopId) {
       options.shopId = shopId;
     }
@@ -254,7 +248,7 @@ export const purchasesApi = {
   getOne: (id) => apiCall(`/purchases/${id}`),
   getTotals: (filters) => {
     const options = { filters: {} };
-    const shopId = getSelectedShopId();
+    const shopId = resolveShopId(filters);
     if (shopId) {
       options.shopId = shopId;
     }
@@ -278,17 +272,22 @@ export const purchasesApi = {
 export const expensesApi = {
   getAll: (page, limit, filters) => {
     const options = { page, limit, filters };
-    const shopId = getSelectedShopId();
+    const shopId = resolveShopId(filters);
     if (shopId) {
       options.shopId = shopId;
     }
     return apiCall('/expense', options);
   },
   getOne: (id) => apiCall(`/expense/${id}`),
-  getTotals: (shopId) => {
-    const options = {};
-    const selectedShopId = getSelectedShopId();
-    options.shopId = shopId || selectedShopId;
+  getTotals: (filters) => {
+    const options = { filters: {} };
+    const shopId = resolveShopId(filters);
+    if (shopId) {
+      options.shopId = shopId;
+    }
+    if (filters?.date) options.filters.date = filters.date;
+    if (filters?.dateFrom) options.filters.dateFrom = filters.dateFrom;
+    if (filters?.dateTo) options.filters.dateTo = filters.dateTo;
     return apiCall('/expense/totals', options);
   },
   create: (data) => {

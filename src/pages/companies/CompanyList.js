@@ -8,7 +8,9 @@ const CompanyList = () => {
     { 
       header: 'Categories', 
       accessor: 'categories',
-      render: (value) => Array.isArray(value) ? value.join(', ') : value
+      render: (value) => Array.isArray(value) && value.length > 0
+        ? value.map(c => c.name || c).join(', ')
+        : '—'
     },
   ];
 
@@ -19,6 +21,8 @@ const CompanyList = () => {
       fetchData={companiesApi.getAll}
       basePath="/companies"
       onDelete={companiesApi.delete}
+      writePermission="companies.write"
+      deletePermission="companies.delete"
       showFilters={false}
     />
   );

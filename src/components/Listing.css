@@ -31,6 +31,12 @@
   background-color: #45a049;
 }
 
+.listing-refreshing {
+  color: #666;
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+
 .pagination-info {
   text-align: center;
   margin-top: 10px;
@@ -67,4 +73,24 @@
   font-size: 20px;
   font-weight: bold;
   color: #333;
+}
+
+@media (max-width: 768px) {
+  .listing-container {
+    padding: 12px;
+  }
+
+  .listing-header {
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .listing-header h1 {
+    font-size: 24px;
+  }
+
+  .listing-create-button {
+    width: 100%;
+  }
 }

@@ -255,7 +255,7 @@ const SaleEdit = () => {
               </div>
 
               <div className="form-fields-row">
-                <FormField label="Item" htmlFor={`item-${index}`}>
+                <FormField label="Item" htmlFor={`item-${index}`} required>
                   <Input
                     type="dropdown"
                     name="itemId"
@@ -265,7 +265,7 @@ const SaleEdit = () => {
                     options={itemOptions}
                   />
                 </FormField>
-                <FormField label="Quantity" htmlFor={`quantity-${index}`}>
+                <FormField label="Quantity" htmlFor={`quantity-${index}`} required>
                   <Input
                     type="number"
                     name="quantity"
@@ -290,7 +290,7 @@ const SaleEdit = () => {
               )}
 
               <div className="form-fields-row">
-                <FormField label="Amount" htmlFor={`amount-${index}`}>
+                <FormField label="Amount" htmlFor={`amount-${index}`} required>
                   <Input
                     type="number"
                     name="amount"

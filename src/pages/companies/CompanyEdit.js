@@ -4,7 +4,7 @@ import Navigation from '../../components/Navigation';
 import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
-import { companiesApi, categoriesApi } from '../../services/api';
+import { companiesApi, categoriesApi, unwrapList } from '../../services/api';
 
 const CompanyEdit = () => {
   const navigate = useNavigate();
@@ -24,7 +24,10 @@ const CompanyEdit = () => {
   const loadData = async () => {
     try {
       const data = await companiesApi.getOne(id);
-      setFormData(data);
+      setFormData({
+        name: data.name || '',
+        categories: (data.categories || []).map(c => c.id || c),
+      });
     } catch (error) {
       console.error('Error loading company:', error);
     } finally {
@@ -35,7 +38,7 @@ const CompanyEdit = () => {
   const loadCategories = async () => {
     try {
       const data = await categoriesApi.getAll();
-      setCategories(data);
+      setCategories(unwrapList(data));
     } catch (error) {
       console.error('Error loading categories:', error);
     }
@@ -59,7 +62,10 @@ const CompanyEdit = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await companiesApi.update(id, formData);
+      await companiesApi.update(id, {
+        name: formData.name,
+        categories: formData.categories.map(c => Number(c)),
+      });
       navigate('/companies');
     } catch (error) {
       console.error('Error updating company:', error);
@@ -85,7 +91,7 @@ const CompanyEdit = () => {
       <Navigation />
       <FormWrapper title="Edit Company" onSubmit={handleSubmit}>
         <div className="form-fields-row">
-          <FormField label="Name" htmlFor="name">
+          <FormField label="Name" htmlFor="name" required>
             <Input
               type="text"
               name="name"

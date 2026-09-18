@@ -21,6 +21,19 @@
   color: #333;
 }
 
+.auth-label {
+  display: block;
+  margin: 8px 0 0;
+  font-weight: 500;
+  color: #333;
+  text-align: left;
+}
+
+.required-asterisk {
+  color: #d32f2f;
+  font-weight: 700;
+}
+
 .auth-button {
   width: 100%;
   padding: 12px;

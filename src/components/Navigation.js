@@ -1,54 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useShop } from '../contexts/ShopContext';
+import { usersApi } from '../services/api';
+import { clearSession, getUser, getViewTenantId, hasSingleAssignedShop, isSuperAdmin, setViewTenantId } from '../services/session';
 import './Navigation.css';
 
 const Navigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { selectedShop, selectedStore, hideStoresNav } = useShop();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(getUser());
+  const [tenants, setTenants] = useState([]);
+  const [viewTenantId, setLocalTenantId] = useState(getViewTenantId() || '');
 
   useEffect(() => {
-    // Check if user is logged in
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      try {
-        setUser(JSON.parse(userStr));
-      } catch (e) {
-        console.error('Error parsing user from localStorage:', e);
-      }
-    }
-
-    // Listen for storage changes (when user logs in/out in another tab)
-    const handleStorageChange = (e) => {
-      if (e.key === 'user') {
-        if (e.newValue) {
-          try {
-            setUser(JSON.parse(e.newValue));
-          } catch (err) {
-            setUser(null);
-          }
-        } else {
-          setUser(null);
-        }
-      }
+    const refreshUser = () => setUser(getUser());
+    window.addEventListener('ims-session', refreshUser);
+    window.addEventListener('storage', refreshUser);
+    return () => {
+      window.removeEventListener('ims-session', refreshUser);
+      window.removeEventListener('storage', refreshUser);
     };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
+  useEffect(() => {
+    if (!isSuperAdmin(user)) {
+      return;
+    }
+    usersApi.getTenants().then(setTenants).catch(() => setTenants([]));
+  }, [user]);
+
   const menuItems = [
-    { path: '/shops', label: 'Shops' },
-    { path: '/stores', label: 'Stores' },
-    { path: '/companies', label: 'Companies' },
-    { path: '/items', label: 'Items' },
-    { path: '/orders', label: 'Orders' },
-    { path: '/purchases', label: 'Purchases' },
+    { path: '/home', label: 'Dashboard' },
     { path: '/sales', label: 'Sales' },
+    { path: '/items', label: 'Items' },
+    { path: '/categories', label: 'Categories' },
+    { path: '/companies', label: 'Companies' },
+    { path: '/purchases', label: 'Purchases' },
     { path: '/expenses', label: 'Expenses' },
-    { path: '/categories', label: 'Categories' }
+    { path: '/shops', label: 'Shops', hide: hasSingleAssignedShop(user) },
+    { path: '/stores', label: 'Stores', hide: hideStoresNav },
+    // { path: '/orders', label: 'Orders' },
   ];
+
+  if (isSuperAdmin(user)) {
+    menuItems.splice(1, 0, { path: '/admin/users', label: 'Users' });
+  }
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -59,16 +57,16 @@ const Navigation = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('selectedShop');
+    clearSession();
     setUser(null);
     navigate('/');
     closeMenu();
   };
 
-  const handleLogin = () => {
-    navigate('/');
-    closeMenu();
+  const handleTenantChange = (e) => {
+    const value = e.target.value;
+    setLocalTenantId(value);
+    setViewTenantId(value || null);
   };
 
   return (
@@ -85,7 +83,7 @@ const Navigation = () => {
           <span className={isMenuOpen ? 'hamburger open' : 'hamburger'}></span>
         </button>
         <ul className={`nav-menu ${isMenuOpen ? 'active' : ''}`}>
-          {menuItems.map((item) => (
+          {menuItems.filter(item => !item.hide).map((item) => (
             <li key={item.path}>
               <Link
                 to={item.path}
@@ -96,25 +94,48 @@ const Navigation = () => {
               </Link>
             </li>
           ))}
-          <li className="nav-auth">
-            {user ? (
-              <>
-                <span className="nav-user-info">{user.name || user.email}</span>
-                <button className="nav-logout-btn" onClick={handleLogout}>
-                  Logout
-                </button>
-              </>
-            ) : (
-              <button className="nav-login-btn" onClick={handleLogin}>
-                Login
-              </button>
-            )}
-          </li>
         </ul>
+        <div className="nav-auth">
+          {user ? (
+            <>
+              {selectedShop && (
+                hasSingleAssignedShop(user) ? (
+                  <span className="nav-shop-info">Shop: {selectedShop.name}</span>
+                ) : (
+                  <Link to="/shops" className="nav-shop-info" onClick={closeMenu}>
+                    Shop: {selectedShop.name}
+                  </Link>
+                )
+              )}
+              {isSuperAdmin(user) && (
+                <select
+                  className="nav-tenant-select"
+                  value={viewTenantId}
+                  onChange={handleTenantChange}
+                  title="Organization scope for create and list"
+                >
+                  <option value="">All organizations</option>
+                  {tenants.map(tenant => (
+                    <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
+                  ))}
+                </select>
+              )}
+              <span className="nav-user-info" title={user.name || user.email}>
+                {user.name || user.email}
+              </span>
+              <button className="nav-logout-btn" onClick={handleLogout}>
+                Logout
+              </button>
+            </>
+          ) : (
+            <button className="nav-login-btn" onClick={() => { navigate('/'); closeMenu(); }}>
+              Login
+            </button>
+          )}
+        </div>
       </div>
     </nav>
   );
 };
 
 export default Navigation;
-

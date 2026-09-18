@@ -13,6 +13,37 @@
   border-color: #4CAF50;
 }
 
+.password-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-wrap .common-input {
+  padding-right: 42px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.password-toggle:hover,
+.password-toggle:focus {
+  color: #333;
+  outline: none;
+}
+
 /* Dropdown Styles */
 .dropdown-container {
   position: relative;

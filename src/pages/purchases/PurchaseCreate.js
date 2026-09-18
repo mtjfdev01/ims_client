@@ -5,6 +5,7 @@ import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import { purchasesApi, itemsApi } from '../../services/api';
+import RequireShop from '../../components/RequireShop';
 
 const PurchaseCreate = () => {
   const navigate = useNavigate();
@@ -82,9 +83,10 @@ const PurchaseCreate = () => {
   return (
     <div>
       <Navigation />
+      <RequireShop block>
       <FormWrapper title="Create Purchase" onSubmit={handleSubmit}>
         <div className="form-fields-row">
-          <FormField label="Item" htmlFor="itemId">
+          <FormField label="Item" htmlFor="itemId" required>
             <Input
               type="dropdown"
               name="itemId"
@@ -94,7 +96,7 @@ const PurchaseCreate = () => {
               options={itemOptions}
             />
           </FormField>
-          <FormField label="Purchase Price (per unit)" htmlFor="purchasePrice">
+          <FormField label="Purchase Price (per unit)" htmlFor="purchasePrice" required>
             <Input
               type="number"
               name="purchasePrice"
@@ -105,7 +107,7 @@ const PurchaseCreate = () => {
               min="0"
             />
           </FormField>
-          <FormField label="Quantity" htmlFor="quantity">
+          <FormField label="Quantity" htmlFor="quantity" required>
             <Input
               type="number"
               name="quantity"
@@ -117,7 +119,7 @@ const PurchaseCreate = () => {
           </FormField>
         </div>
         <div className="form-fields-row">
-          <FormField label="Purchase Date" htmlFor="purchaseDate">
+          <FormField label="Purchase Date" htmlFor="purchaseDate" required>
             <Input
               type="date"
               name="purchaseDate"
@@ -135,6 +137,7 @@ const PurchaseCreate = () => {
           </button>
         </div>
       </FormWrapper>
+      </RequireShop>
     </div>
   );
 };

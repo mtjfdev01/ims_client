@@ -5,6 +5,7 @@ import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import { ordersApi, itemsApi } from '../../services/api';
+import RequireShop from '../../components/RequireShop';
 import './OrderCreate.css';
 
 const OrderCreate = () => {
@@ -28,7 +29,18 @@ const OrderCreate = () => {
   const loadItems = async () => {
     try {
       const data = await itemsApi.getAll();
-      const itemsArray = Array.isArray(data) ? data : (data.data || []);
+      let itemsArray = Array.isArray(data) ? data : (data.data || []);
+      const selectedShopStr = localStorage.getItem('selectedShop');
+      if (selectedShopStr) {
+        try {
+          const selectedShop = JSON.parse(selectedShopStr);
+          if (selectedShop?.id) {
+            itemsArray = itemsArray.filter(item => item.shop && item.shop.id === selectedShop.id);
+          }
+        } catch (e) {
+          console.error('Error parsing selected shop from localStorage:', e);
+        }
+      }
       setItems(itemsArray);
     } catch (error) {
       console.error('Error loading items:', error);
@@ -174,9 +186,10 @@ const OrderCreate = () => {
   return (
     <div>
       <Navigation />
+      <RequireShop block>
       <FormWrapper title="Create Order" onSubmit={handleSubmit}>
         <div className="form-fields-row">
-          <FormField label="Status" htmlFor="status">
+          <FormField label="Status" htmlFor="status" required>
             <Input
               type="dropdown"
               name="status"
@@ -212,7 +225,7 @@ const OrderCreate = () => {
               </div>
 
               <div className="form-fields-row">
-                <FormField label="Item" htmlFor={`item-${index}`}>
+                <FormField label="Item" htmlFor={`item-${index}`} required>
                   <Input
                     type="dropdown"
                     name="itemId"
@@ -222,7 +235,7 @@ const OrderCreate = () => {
                     options={itemOptions}
                   />
                 </FormField>
-                <FormField label="Quantity" htmlFor={`quantity-${index}`}>
+                <FormField label="Quantity" htmlFor={`quantity-${index}`} required>
                   <Input
                     type="number"
                     name="quantity"
@@ -275,6 +288,7 @@ const OrderCreate = () => {
           </button>
         </div>
       </FormWrapper>
+      </RequireShop>
     </div>
   );
 };

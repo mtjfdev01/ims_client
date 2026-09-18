@@ -1,19 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import './ItemFilterPanel.css';
 
-const ItemFilterPanel = ({ onFilterChange, onClear, currentFilters = {} }) => {
+const ItemFilterPanel = ({
+  onFilterChange,
+  onClear,
+  currentFilters = {},
+  showStoreOption = true,
+  showShopOption = true,
+}) => {
   const [filters, setFilters] = useState({
-    filterType: currentFilters.filterType || '', // 'store' or 'shop' or ''
-    search: currentFilters.search || ''
+    filterType: currentFilters.filterType || '',
+    search: currentFilters.search || '',
+    date: currentFilters.date || '',
+    dateFrom: currentFilters.dateFrom || '',
+    dateTo: currentFilters.dateTo || '',
   });
 
-  // Update local state when currentFilters prop changes
+  const showTypeFilter = showStoreOption || showShopOption;
+
   useEffect(() => {
     setFilters({
       filterType: currentFilters.filterType || '',
-      search: currentFilters.search || ''
+      search: currentFilters.search || '',
+      date: currentFilters.date || '',
+      dateFrom: currentFilters.dateFrom || '',
+      dateTo: currentFilters.dateTo || '',
     });
-  }, [currentFilters.filterType, currentFilters.search]);
+  }, [currentFilters.filterType, currentFilters.search, currentFilters.date, currentFilters.dateFrom, currentFilters.dateTo]);
+
+  useEffect(() => {
+    if (filters.filterType === 'store' && !showStoreOption) {
+      const next = { ...filters, filterType: '' };
+      setFilters(next);
+      onFilterChange(next);
+    }
+    if (filters.filterType === 'shop' && !showShopOption) {
+      const next = { ...filters, filterType: '' };
+      setFilters(next);
+      onFilterChange(next);
+    }
+  }, [showStoreOption, showShopOption]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,7 +47,14 @@ const ItemFilterPanel = ({ onFilterChange, onClear, currentFilters = {} }) => {
       ...filters,
       [name]: value
     };
-    
+    if (name === 'date' && value) {
+      newFilters.dateFrom = '';
+      newFilters.dateTo = '';
+    }
+    if ((name === 'dateFrom' || name === 'dateTo') && value) {
+      newFilters.date = '';
+    }
+
     setFilters(newFilters);
     onFilterChange(newFilters);
   };
@@ -29,7 +62,10 @@ const ItemFilterPanel = ({ onFilterChange, onClear, currentFilters = {} }) => {
   const handleClear = () => {
     const clearedFilters = {
       filterType: '',
-      search: ''
+      search: '',
+      date: '',
+      dateFrom: '',
+      dateTo: '',
     };
     setFilters(clearedFilters);
     onClear();
@@ -43,20 +79,22 @@ const ItemFilterPanel = ({ onFilterChange, onClear, currentFilters = {} }) => {
       </div>
       <div className="filter-panel-body">
         <div className="filter-row">
-          <div className="filter-field">
-            <label htmlFor="filterType">Filter by Type:</label>
-            <select
-              id="filterType"
-              name="filterType"
-              value={filters.filterType}
-              onChange={handleChange}
-              className="filter-input"
-            >
-              <option value="">All Items</option>
-              <option value="store">Store Items Only</option>
-              <option value="shop">Shop Items Only</option>
-            </select>
-          </div>
+          {showTypeFilter && (
+            <div className="filter-field">
+              <label htmlFor="filterType">Filter by Type:</label>
+              <select
+                id="filterType"
+                name="filterType"
+                value={filters.filterType}
+                onChange={handleChange}
+                className="filter-input"
+              >
+                <option value="">All Items</option>
+                {showStoreOption && <option value="store">Store Items Only</option>}
+                {showShopOption && <option value="shop">Shop Items Only</option>}
+              </select>
+            </div>
+          )}
           <div className="filter-field">
             <label htmlFor="search">Search:</label>
             <input
@@ -66,6 +104,39 @@ const ItemFilterPanel = ({ onFilterChange, onClear, currentFilters = {} }) => {
               value={filters.search}
               onChange={handleChange}
               placeholder="Search by name..."
+              className="filter-input"
+            />
+          </div>
+          <div className="filter-field">
+            <label htmlFor="date">Single Date:</label>
+            <input
+              type="date"
+              id="date"
+              name="date"
+              value={filters.date}
+              onChange={handleChange}
+              className="filter-input"
+            />
+          </div>
+          <div className="filter-field">
+            <label htmlFor="dateFrom">Date From:</label>
+            <input
+              type="date"
+              id="dateFrom"
+              name="dateFrom"
+              value={filters.dateFrom}
+              onChange={handleChange}
+              className="filter-input"
+            />
+          </div>
+          <div className="filter-field">
+            <label htmlFor="dateTo">Date To:</label>
+            <input
+              type="date"
+              id="dateTo"
+              name="dateTo"
+              value={filters.dateTo}
+              onChange={handleChange}
               className="filter-input"
             />
           </div>

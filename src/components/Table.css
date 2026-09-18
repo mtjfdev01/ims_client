@@ -5,6 +5,7 @@
 
 .common-table {
   width: 100%;
+  min-width: 960px;
   border-collapse: collapse;
   background: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -19,6 +20,7 @@
 .common-table td {
   padding: 12px;
   text-align: left;
+  vertical-align: middle;
   border-bottom: 1px solid #ddd;
 }
 
@@ -32,18 +34,26 @@
   color: #999;
 }
 
-.table-actions {
-  display: flex;
-  gap: 8px;
+.common-table td.table-actions {
+  width: 1%;
   white-space: nowrap;
 }
 
+.table-actions-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
 .table-button {
-  padding: 12px;
+  padding: 8px 12px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
   transition: background-color 0.3s;
 }
 
@@ -72,5 +82,59 @@
 
 .table-button-delete:hover {
   background-color: #c82333;
+}
+
+.table-button-eye {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+
+  .common-table {
+    min-width: 720px;
+  }
+
+  .table-button-view,
+  .table-button-edit,
+  .table-button-delete {
+    display: none;
+  }
+
+  .table-button-eye {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: #333;
+    cursor: pointer;
+  }
+
+  .common-table thead th:last-child,
+  .common-table td.table-actions {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+  }
+
+  .common-table thead th:last-child {
+    background-color: #333;
+  }
+
+  .common-table td.table-actions {
+    background-color: #fff;
+  }
+
+  .common-table tbody tr:hover td.table-actions {
+    background-color: #f5f5f5;
+  }
 }
 

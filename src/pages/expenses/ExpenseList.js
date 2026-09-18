@@ -28,6 +28,8 @@ const ExpenseList = () => {
       fetchData={expensesApi.getAll}
       basePath="/expenses"
       onDelete={expensesApi.delete}
+      writePermission="expenses.write"
+      deletePermission="expenses.delete"
       fetchTotals={expensesApi.getTotals}
       totalsConfig={totalsConfig}
     />

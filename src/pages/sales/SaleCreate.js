@@ -5,6 +5,7 @@ import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import { salesApi, itemsApi } from '../../services/api';
+import RequireShop from '../../components/RequireShop';
 import './SaleCreate.css';
 
 const SaleCreate = () => {
@@ -206,6 +207,7 @@ const SaleCreate = () => {
   return (
     <div>
       <Navigation />
+      <RequireShop block>
       <FormWrapper title="Create Sale" onSubmit={handleSubmit}>
         <div className="sale-items-container">
           <div className="sale-items-header">
@@ -231,7 +233,7 @@ const SaleCreate = () => {
               </div>
 
               <div className="form-fields-row">
-                <FormField label="Item" htmlFor={`item-${index}`}>
+                <FormField label="Item" htmlFor={`item-${index}`} required>
                   <Input
                     type="dropdown"
                     name="itemId"
@@ -241,7 +243,7 @@ const SaleCreate = () => {
                     options={itemOptions}
                   />
                 </FormField>
-                <FormField label="Quantity" htmlFor={`quantity-${index}`}>
+                <FormField label="Quantity" htmlFor={`quantity-${index}`} required>
                   <Input
                     type="number"
                     name="quantity"
@@ -267,7 +269,7 @@ const SaleCreate = () => {
               )}
 
               <div className="form-fields-row">
-                <FormField label="Amount" htmlFor={`amount-${index}`}>
+                <FormField label="Amount" htmlFor={`amount-${index}`} required>
                   <Input
                     type="number"
                     name="amount"
@@ -311,6 +313,7 @@ const SaleCreate = () => {
           </button>
         </div>
       </FormWrapper>
+      </RequireShop>
     </div>
   );
 };

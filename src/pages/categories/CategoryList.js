@@ -14,6 +14,8 @@ const CategoryList = () => {
       fetchData={categoriesApi.getAll}
       basePath="/categories"
       onDelete={categoriesApi.delete}
+      writePermission="categories.write"
+      deletePermission="categories.delete"
       showFilters={false}
     />
   );

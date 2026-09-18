@@ -5,9 +5,12 @@ import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import { itemsApi, companiesApi, categoriesApi, storesApi, shopsApi, unwrapList } from '../../services/api';
+import { useShop } from '../../contexts/ShopContext';
+import { getAssignedShops, getUser } from '../../services/session';
 
 const ItemCreate = () => {
   const navigate = useNavigate();
+  const { selectedShop, selectedStore, shopStores } = useShop();
   const [formData, setFormData] = useState({
     name: '',
     company: '',
@@ -24,6 +27,17 @@ const ItemCreate = () => {
   const [stores, setStores] = useState([]);
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const user = getUser();
+  const assignedShops = getAssignedShops(user);
+  const availableShops = user?.role === 'user'
+    ? shops.filter(shop => assignedShops.some(assigned => assigned.id === shop.id))
+    : shops;
+  const availableStores = user?.role === 'user'
+    ? (Array.isArray(shopStores) ? shopStores : [])
+    : stores;
+  const showShopSelect = availableShops.length > 1;
+  const showStoreSelect = availableStores.length > 1;
 
   useEffect(() => {
     loadCompanies();
@@ -129,13 +143,22 @@ const ItemCreate = () => {
         categories: Array.isArray(formData.categories) && formData.categories.length > 0 
           ? formData.categories.map(c => parseInt(c)) 
           : [],
-        storeId: formData.storeId && formData.storeId !== '' ? parseInt(formData.storeId) : undefined,
-        shopId: formData.shopId && formData.shopId !== '' ? parseInt(formData.shopId) : undefined,
-        location: formData.location || '',
+        location: formData.location?.trim() || undefined,
         quantity: formData.quantity ?? 0,
         purchasePrice: formData.purchasePrice || 0,
         minimumSalePrice: formData.minimumSalePrice || 0
       };
+      const pickedStoreId = showStoreSelect && formData.storeId ? parseInt(formData.storeId) : undefined;
+      const pickedShopId = showShopSelect && formData.shopId ? parseInt(formData.shopId) : undefined;
+      if (pickedStoreId) {
+        submitData.storeId = pickedStoreId;
+      } else if (pickedShopId) {
+        submitData.shopId = pickedShopId;
+      } else if (!showShopSelect && (selectedShop?.id || availableShops[0]?.id)) {
+        submitData.shopId = selectedShop?.id || availableShops[0].id;
+      } else if (!showStoreSelect && (selectedStore?.id || availableStores[0]?.id)) {
+        submitData.storeId = selectedStore?.id || availableStores[0].id;
+      }
       await itemsApi.create(submitData);
       navigate('/items');
     } catch (error) {
@@ -147,15 +170,13 @@ const ItemCreate = () => {
 
   const companyOptions = companies.map(comp => ({ value: comp.id, label: comp.name }));
   const categoryOptions = categories.map(cat => ({ value: cat.id, label: cat.name }));
-  const storeOptions = stores.map(store => ({ value: store.id, label: store.name }));
-  const shopOptions = shops.map(shop => ({ value: shop.id, label: shop.name }));
 
   return (
     <div>
       <Navigation />
       <FormWrapper title="Create Item" onSubmit={handleSubmit}>
         <div className="form-fields-row">
-          <FormField label="Name" htmlFor="name">
+          <FormField label="Name" htmlFor="name" required>
             <Input
               type="text"
               name="name"
@@ -164,7 +185,7 @@ const ItemCreate = () => {
               onChange={handleChange}
             />
           </FormField>
-          <FormField label="Company" htmlFor="company">
+          <FormField label="Company" htmlFor="company" required>
             <Input
               type="dropdown"
               name="company"
@@ -187,7 +208,7 @@ const ItemCreate = () => {
               multiple={true}
             />
           </FormField>
-          <FormField label="Location" htmlFor="location">
+          <FormField label="Location (optional)" htmlFor="location">
             <Input
               type="text"
               name="location"
@@ -197,7 +218,9 @@ const ItemCreate = () => {
             />
           </FormField>
         </div>
+        {(showStoreSelect || showShopSelect) && (
         <div className="form-fields-row">
+          {showStoreSelect && (
           <FormField label="Store (optional)" htmlFor="storeId">
             <Input
               type="dropdown"
@@ -205,9 +228,11 @@ const ItemCreate = () => {
               placeholder="Select Store (optional)"
               value={formData.storeId}
               onChange={handleChange}
-              options={storeOptions}
+              options={availableStores.map(store => ({ value: store.id, label: store.name }))}
             />
           </FormField>
+          )}
+          {showShopSelect && (
           <FormField label="Shop (optional)" htmlFor="shopId">
             <Input
               type="dropdown"
@@ -215,12 +240,14 @@ const ItemCreate = () => {
               placeholder="Select Shop (optional)"
               value={formData.shopId}
               onChange={handleChange}
-              options={shopOptions}
+              options={availableShops.map(shop => ({ value: shop.id, label: shop.name }))}
             />
           </FormField>
+          )}
         </div>
+        )}
         <div className="form-fields-row">
-          <FormField label="Quantity" htmlFor="quantity">
+          <FormField label="Quantity" htmlFor="quantity" required>
             <Input
               type="number"
               name="quantity"
@@ -230,7 +257,7 @@ const ItemCreate = () => {
               min="1"
             />
           </FormField>
-          <FormField label="Purchase Price (per unit)" htmlFor="purchasePrice">
+          <FormField label="Purchase Price (per unit)" htmlFor="purchasePrice" required>
             <Input
               type="number"
               name="purchasePrice"
@@ -242,7 +269,7 @@ const ItemCreate = () => {
           </FormField>
         </div>
         <div className="form-fields-row">
-          <FormField label="Minimum Sale Price" htmlFor="minimumSalePrice">
+          <FormField label="Minimum Sale Price" htmlFor="minimumSalePrice" required>
             <Input
               type="number"
               name="minimumSalePrice"

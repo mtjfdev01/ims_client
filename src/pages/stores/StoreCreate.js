@@ -64,7 +64,7 @@ const StoreCreate = () => {
       <Navigation />
       <FormWrapper title="Create Store" onSubmit={handleSubmit}>
         <div className="form-fields-row">
-          <FormField label="Name" htmlFor="name">
+          <FormField label="Name" htmlFor="name" required>
             <Input
               type="text"
               name="name"
@@ -73,7 +73,7 @@ const StoreCreate = () => {
               onChange={handleChange}
             />
           </FormField>
-          <FormField label="Location" htmlFor="location">
+          <FormField label="Location" htmlFor="location" required>
             <Input
               type="text"
               name="location"

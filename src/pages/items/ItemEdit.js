@@ -189,7 +189,7 @@ const ItemEdit = () => {
       <Navigation />
       <FormWrapper title="Edit Item" onSubmit={handleSubmit}>
         <div className="form-fields-row">
-          <FormField label="Name" htmlFor="name">
+          <FormField label="Name" htmlFor="name" required>
             <Input
               type="text"
               name="name"
@@ -198,7 +198,7 @@ const ItemEdit = () => {
               onChange={handleChange}
             />
           </FormField>
-          <FormField label="Company" htmlFor="company">
+          <FormField label="Company" htmlFor="company" required>
             <Input
               type="dropdown"
               name="company"
@@ -254,7 +254,7 @@ const ItemEdit = () => {
           </FormField>
         </div>
         <div className="form-fields-row">
-          <FormField label="Quantity" htmlFor="quantity">
+          <FormField label="Quantity" htmlFor="quantity" required>
             <Input
               type="number"
               name="quantity"
@@ -264,7 +264,7 @@ const ItemEdit = () => {
               min="1"
             />
           </FormField>
-          <FormField label="Purchase Price (per unit)" htmlFor="purchasePrice">
+          <FormField label="Purchase Price (per unit)" htmlFor="purchasePrice" required>
             <Input
               type="number"
               name="purchasePrice"
@@ -276,7 +276,7 @@ const ItemEdit = () => {
           </FormField>
         </div>
         <div className="form-fields-row">
-          <FormField label="Minimum Sale Price" htmlFor="minimumSalePrice">
+          <FormField label="Minimum Sale Price" htmlFor="minimumSalePrice" required>
             <Input
               type="number"
               name="minimumSalePrice"

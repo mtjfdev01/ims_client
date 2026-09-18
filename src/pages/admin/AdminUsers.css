@@ -1,0 +1,144 @@
+.admin-users-page {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-users-page h1 {
+  margin: 0 0 20px;
+  color: #333;
+}
+
+.admin-card {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.admin-card h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  color: #333;
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.admin-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 180px;
+  overflow: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.admin-checkbox-list label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+}
+
+.admin-error {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.admin-success {
+  color: #2e7d32;
+  background-color: #e8f5e9;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-actions button,
+.admin-primary-btn {
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  color: white;
+  font-size: 13px;
+}
+
+.admin-primary-btn {
+  background-color: #4CAF50;
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+.admin-password-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 110px;
+}
+
+.admin-password-cell .password-toggle {
+  position: static;
+  transform: none;
+  color: #555;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.admin-password-cell .password-toggle:hover {
+  color: #111;
+}
+
+.admin-actions .reset {
+  background-color: #ff9800;
+}
+
+.admin-actions .assign {
+  background-color: #6c757d;
+}
+
+.admin-actions .archive {
+  background-color: #f44336;
+}
+
+.admin-inline-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.admin-inline-form input,
+.admin-card select,
+.admin-card input[type="text"],
+.admin-card input[type="email"],
+.admin-card input[type="password"] {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

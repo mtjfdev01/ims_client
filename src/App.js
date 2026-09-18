@@ -62,20 +62,34 @@ import ExpenseList from './pages/expenses/ExpenseList';
 import ExpenseCreate from './pages/expenses/ExpenseCreate';
 import ExpenseView from './pages/expenses/ExpenseView';
 import ExpenseEdit from './pages/expenses/ExpenseEdit';
+import AdminUsers from './pages/admin/AdminUsers';
+import { defaultHomePath, hasPermission, isAuthenticated, isSuperAdmin } from './services/session';
 
 import './App.css';
 
-const isLoggedIn = () => {
-  try {
-    return !!JSON.parse(localStorage.getItem('user') || 'null');
-  } catch (e) {
-    return false;
+const RequireAuth = ({ children }) => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/" replace />;
   }
+  return children;
 };
 
-const RequireAuth = ({ children }) => {
-  if (!isLoggedIn()) {
+const RequireSuperAdmin = ({ children }) => {
+  if (!isAuthenticated()) {
     return <Navigate to="/" replace />;
+  }
+  if (!isSuperAdmin()) {
+    return <Navigate to={defaultHomePath()} replace />;
+  }
+  return children;
+};
+
+const RequirePermission = ({ permission, children }) => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/" replace />;
+  }
+  if (!hasPermission(permission)) {
+    return <Navigate to={defaultHomePath()} replace />;
   }
   return children;
 };
@@ -88,34 +102,35 @@ function App() {
           <Routes>
           <Route path="/" element={<Auth />} />
           <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
+          <Route path="/admin/users" element={<RequireSuperAdmin><AdminUsers /></RequireSuperAdmin>} />
           
           {/* Shops Routes */}
           <Route path="/shops" element={<RequireAuth><ShopList /></RequireAuth>} />
-          <Route path="/shops/create" element={<RequireAuth><ShopCreate /></RequireAuth>} />
+          <Route path="/shops/create" element={<RequirePermission permission="shops.write"><ShopCreate /></RequirePermission>} />
           <Route path="/shops/:id" element={<RequireAuth><ShopView /></RequireAuth>} />
-          <Route path="/shops/:id/edit" element={<RequireAuth><ShopEdit /></RequireAuth>} />
+          <Route path="/shops/:id/edit" element={<RequirePermission permission="shops.write"><ShopEdit /></RequirePermission>} />
           <Route path="/shops/:id/items" element={<RequireAuth><ShopItems /></RequireAuth>} />
           <Route path="/shops/:id/sales" element={<RequireAuth><ShopSales /></RequireAuth>} />
           <Route path="/shops/:id/expenses" element={<RequireAuth><ShopExpenses /></RequireAuth>} />
           
           {/* Stores Routes */}
           <Route path="/stores" element={<RequireAuth><StoreList /></RequireAuth>} />
-          <Route path="/stores/create" element={<RequireAuth><StoreCreate /></RequireAuth>} />
+          <Route path="/stores/create" element={<RequirePermission permission="stores.write"><StoreCreate /></RequirePermission>} />
           <Route path="/stores/:id" element={<RequireAuth><StoreView /></RequireAuth>} />
-          <Route path="/stores/:id/edit" element={<RequireAuth><StoreEdit /></RequireAuth>} />
+          <Route path="/stores/:id/edit" element={<RequirePermission permission="stores.write"><StoreEdit /></RequirePermission>} />
           <Route path="/stores/:id/items" element={<RequireAuth><StoreItems /></RequireAuth>} />
           
           {/* Categories Routes */}
           <Route path="/categories" element={<RequireAuth><CategoryList /></RequireAuth>} />
-          <Route path="/categories/create" element={<RequireAuth><CategoryCreate /></RequireAuth>} />
+          <Route path="/categories/create" element={<RequirePermission permission="categories.write"><CategoryCreate /></RequirePermission>} />
           <Route path="/categories/:id" element={<RequireAuth><CategoryView /></RequireAuth>} />
-          <Route path="/categories/:id/edit" element={<RequireAuth><CategoryEdit /></RequireAuth>} />
+          <Route path="/categories/:id/edit" element={<RequirePermission permission="categories.write"><CategoryEdit /></RequirePermission>} />
           
           {/* Companies Routes */}
           <Route path="/companies" element={<RequireAuth><CompanyList /></RequireAuth>} />
-          <Route path="/companies/create" element={<RequireAuth><CompanyCreate /></RequireAuth>} />
+          <Route path="/companies/create" element={<RequirePermission permission="companies.write"><CompanyCreate /></RequirePermission>} />
           <Route path="/companies/:id" element={<RequireAuth><CompanyView /></RequireAuth>} />
-          <Route path="/companies/:id/edit" element={<RequireAuth><CompanyEdit /></RequireAuth>} />
+          <Route path="/companies/:id/edit" element={<RequirePermission permission="companies.write"><CompanyEdit /></RequirePermission>} />
           
           {/* Items Routes */}
           <Route path="/items" element={<RequireAuth><ItemList /></RequireAuth>} />

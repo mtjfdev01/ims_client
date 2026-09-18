@@ -40,7 +40,7 @@ const CategoryCreate = () => {
       <Navigation />
       <FormWrapper title="Create Category" onSubmit={handleSubmit}>
         <div className="form-fields-row">
-          <FormField label="Name" htmlFor="name">
+          <FormField label="Name" htmlFor="name" required>
             <Input
               type="text"
               name="name"

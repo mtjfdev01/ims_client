@@ -4,6 +4,8 @@ import Table from './Table';
 import Navigation from './Navigation';
 import Pagination from './Pagination';
 import FilterPanel from './FilterPanel';
+import CollapsibleFilters from './CollapsibleFilters';
+import { hasPermission } from '../services/session';
 import './Listing.css';
 
 const Listing = ({ 
@@ -15,7 +17,9 @@ const Listing = ({
   showFilters = true,
   renderFilters,
   fetchTotals,
-  totalsConfig
+  totalsConfig,
+  writePermission,
+  deletePermission,
 }) => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
@@ -121,7 +125,7 @@ const Listing = ({
         if (onDelete) {
           await onDelete(id);
         }
-        await loadData(pagination.page, pagination.limit);
+        await loadData(pagination.page, pagination.limit, filters);
       } catch (error) {
         console.error('Error deleting:', error);
         alert('Failed to delete item');
@@ -129,44 +133,41 @@ const Listing = ({
     }
   };
 
-  if (loading) {
-    return (
-      <div>
-        <Navigation />
-        <div className="listing-container">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div>
       <Navigation />
       <div className="listing-container">
         <div className="listing-header">
           <h1>{title}</h1>
-          <button onClick={handleCreate} className="listing-create-button">
-            Create New
-          </button>
+          {(!writePermission || hasPermission(writePermission)) && (
+            <button onClick={handleCreate} className="listing-create-button">
+              Create New
+            </button>
+          )}
         </div>
-        {showFilters && renderFilters && (
-          <div className="listing-filters">
-            {renderFilters(handleFilterChange, filters)}
-          </div>
+        {showFilters && (
+          <CollapsibleFilters title="Filters">
+            {renderFilters ? (
+              <div className="listing-filters">
+                {renderFilters(handleFilterChange, filters)}
+              </div>
+            ) : (
+              <FilterPanel
+                onFilterChange={handleFilterChange}
+                onClear={handleClearFilters}
+              />
+            )}
+          </CollapsibleFilters>
         )}
-        {showFilters && !renderFilters && (
-          <FilterPanel
-            onFilterChange={handleFilterChange}
-            onClear={handleClearFilters}
-          />
-        )}
+        {loading && data.length > 0 && <p className="listing-refreshing">Updating...</p>}
         <Table
           columns={columns}
           data={data}
+          loading={loading}
+          emptyMessage={`No ${title} yet`}
           onView={handleView}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
+          onEdit={(!writePermission || hasPermission(writePermission)) ? handleEdit : undefined}
+          onDelete={onDelete && (!deletePermission || hasPermission(deletePermission)) ? handleDelete : undefined}
         />
         {pagination.totalPages > 1 && (
           <Pagination

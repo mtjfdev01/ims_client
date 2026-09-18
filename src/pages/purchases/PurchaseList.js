@@ -64,6 +64,8 @@ const PurchaseList = () => {
       fetchData={purchasesApi.getAll}
       basePath="/purchases"
       onDelete={purchasesApi.delete}
+      writePermission="purchases.write"
+      deletePermission="purchases.delete"
       fetchTotals={purchasesApi.getTotals}
       totalsConfig={totalsConfig}
       renderFilters={(handleApplyFilters) => (

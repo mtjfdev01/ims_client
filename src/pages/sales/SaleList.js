@@ -49,6 +49,8 @@ const SaleList = () => {
       fetchData={salesApi.getAll}
       basePath="/sales"
       onDelete={salesApi.delete}
+      writePermission="sales.write"
+      deletePermission="sales.delete"
       fetchTotals={salesApi.getTotals}
       totalsConfig={totalsConfig}
     />

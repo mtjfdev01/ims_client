@@ -5,6 +5,7 @@ import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import { expensesApi } from '../../services/api';
+import RequireShop from '../../components/RequireShop';
 import { useShop } from '../../contexts/ShopContext';
 
 const ExpenseCreate = () => {
@@ -59,9 +60,10 @@ const ExpenseCreate = () => {
   return (
     <div>
       <Navigation />
+      <RequireShop block>
       <FormWrapper title="Create Expense" onSubmit={handleSubmit}>
         <div className="form-fields-row">
-          <FormField label="Description" htmlFor="description">
+          <FormField label="Description" htmlFor="description" required>
             <Input
               type="text"
               name="description"
@@ -70,7 +72,7 @@ const ExpenseCreate = () => {
               onChange={handleChange}
             />
           </FormField>
-          <FormField label="Price" htmlFor="price">
+          <FormField label="Price" htmlFor="price" required>
             <Input
               type="number"
               name="price"
@@ -89,6 +91,7 @@ const ExpenseCreate = () => {
           </button>
         </div>
       </FormWrapper>
+      </RequireShop>
     </div>
   );
 };
