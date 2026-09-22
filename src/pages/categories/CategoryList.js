@@ -1,5 +1,6 @@
 import React from 'react';
 import Listing from '../../components/Listing';
+import SearchFilterPanel from '../../components/SearchFilterPanel';
 import { categoriesApi } from '../../services/api';
 
 const CategoryList = () => {
@@ -16,7 +17,14 @@ const CategoryList = () => {
       onDelete={categoriesApi.delete}
       writePermission="categories.write"
       deletePermission="categories.delete"
-      showFilters={false}
+      renderFilters={(handleFilterChange, currentFilters, handleClear) => (
+        <SearchFilterPanel
+          onFilterChange={handleFilterChange}
+          onClear={handleClear}
+          currentFilters={currentFilters}
+          placeholder="Search category name"
+        />
+      )}
     />
   );
 };

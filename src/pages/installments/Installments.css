@@ -1,0 +1,49 @@
+.installment-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.installment-shortcuts button {
+  border: 1px solid #c5d8f5;
+  background: #f4f8ff;
+  color: #1a4d8c;
+  border-radius: 16px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.installment-shortcuts button.active,
+.installment-shortcuts button:hover {
+  background: #1565c0;
+  color: #fff;
+  border-color: #1565c0;
+}
+
+.dashboard-section-title {
+  max-width: 1200px;
+  margin: 28px auto 12px;
+  font-size: 18px;
+  color: #333;
+}
+
+.dashboard-card-installments,
+.dashboard-card-installmentsPending,
+.dashboard-card-installmentsDueSoon,
+.dashboard-card-installmentsWeek {
+  border-top-color: #6A1B9A;
+}
+
+.dashboard-card-installmentsPending {
+  border-top-color: #ef6c00;
+}
+
+.dashboard-card-installmentsDueSoon {
+  border-top-color: #c62828;
+}
+
+.dashboard-card-installmentsWeek {
+  border-top-color: #2e7d32;
+}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import FilterActions from '../../components/FilterActions';
 import './ItemFilterPanel.css';
 
 const ItemFilterPanel = ({
@@ -75,7 +76,6 @@ const ItemFilterPanel = ({
     <div className="filter-panel">
       <div className="filter-panel-header">
         <h3>Filters</h3>
-        <button onClick={handleClear} className="filter-clear-button">Clear All</button>
       </div>
       <div className="filter-panel-body">
         <div className="filter-row">
@@ -141,6 +141,7 @@ const ItemFilterPanel = ({
             />
           </div>
         </div>
+        <FilterActions onClear={handleClear} />
       </div>
     </div>
   );

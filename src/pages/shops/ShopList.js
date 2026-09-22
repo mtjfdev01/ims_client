@@ -1,16 +1,17 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import Listing from '../../components/Listing';
+import SearchFilterPanel from '../../components/SearchFilterPanel';
 import { shopsApi } from '../../services/api';
 import { useShop } from '../../contexts/ShopContext';
-import { hasSingleAssignedShop, isSuperAdmin } from '../../services/session';
+import { defaultHomePath, hasPermission, hasSingleAssignedShop, isSuperAdmin } from '../../services/session';
 import './ShopList.css';
 
 const ShopList = () => {
   const { selectedShop, selectShop, clearShop } = useShop();
 
   if (hasSingleAssignedShop()) {
-    return <Navigate to="/items" replace />;
+    return <Navigate to={hasPermission('items') ? '/items' : defaultHomePath()} replace />;
   }
 
   const columns = [
@@ -48,7 +49,14 @@ const ShopList = () => {
         onDelete={isSuperAdmin() ? shopsApi.delete : undefined}
         writePermission="shops.write"
         deletePermission="shops.delete"
-        showFilters={false}
+        renderFilters={(handleFilterChange, currentFilters, handleClear) => (
+          <SearchFilterPanel
+            onFilterChange={handleFilterChange}
+            onClear={handleClear}
+            currentFilters={currentFilters}
+            placeholder="Search name, branch, location"
+          />
+        )}
       />
     </div>
   );

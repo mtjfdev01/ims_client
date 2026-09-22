@@ -73,10 +73,10 @@ const ItemList = () => {
       onDelete={itemsApi.delete}
       writePermission="items.write"
       deletePermission="items.delete"
-      renderFilters={(handleFilterChange, currentFilters) => (
-        <ItemFilterPanel 
+      renderFilters={(handleFilterChange, currentFilters, handleClear) => (
+        <ItemFilterPanel
           onFilterChange={handleFilterChange}
-          onClear={() => handleFilterChange({ filterType: '', search: '', date: '', dateFrom: '', dateTo: '' })}
+          onClear={handleClear}
           currentFilters={currentFilters}
           showStoreOption={showStoreOption}
           showShopOption={showShopOption}

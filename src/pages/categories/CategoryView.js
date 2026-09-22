@@ -13,6 +13,7 @@ const CategoryView = () => {
       fetchData={categoriesApi.getOne}
       fields={fields}
       basePath="/categories"
+      writePermission="categories.write"
     />
   );
 };

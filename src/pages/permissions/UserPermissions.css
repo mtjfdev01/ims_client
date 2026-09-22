@@ -1,0 +1,64 @@
+.permissions-hint {
+  margin: -8px 0 20px;
+  color: #555;
+}
+
+.permissions-user-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.permissions-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.permissions-user {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.permissions-user span {
+  color: #666;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.permissions-role {
+  text-transform: capitalize;
+}
+
+.permissions-user-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.permissions-count {
+  color: #555;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .permissions-user-row {
+    align-items: flex-start;
+  }
+
+  .permissions-count {
+    display: none;
+  }
+}

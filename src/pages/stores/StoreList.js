@@ -1,16 +1,17 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import Listing from '../../components/Listing';
+import SearchFilterPanel from '../../components/SearchFilterPanel';
 import { storesApi, unwrapList } from '../../services/api';
 import { useShop } from '../../contexts/ShopContext';
-import { getUser, isSuperAdmin } from '../../services/session';
+import { defaultHomePath, getUser, hasPermission, isSuperAdmin } from '../../services/session';
 import '../shops/ShopList.css';
 
 const StoreList = () => {
   const { selectedShop, selectedStore, selectStore, clearStore, shopStores, hideStoresNav } = useShop();
 
   if (hideStoresNav) {
-    return <Navigate to="/items" replace />;
+    return <Navigate to={hasPermission('items') ? '/items' : defaultHomePath()} replace />;
   }
 
   const fetchStores = async (page, limit, filters) => {
@@ -59,7 +60,14 @@ const StoreList = () => {
         onDelete={isSuperAdmin() ? storesApi.delete : undefined}
         writePermission="stores.write"
         deletePermission="stores.delete"
-        showFilters={false}
+        renderFilters={(handleFilterChange, currentFilters, handleClear) => (
+          <SearchFilterPanel
+            onFilterChange={handleFilterChange}
+            onClear={handleClear}
+            currentFilters={currentFilters}
+            placeholder="Search name or location"
+          />
+        )}
       />
     </div>
   );

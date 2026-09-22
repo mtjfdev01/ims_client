@@ -1,5 +1,6 @@
 import React from 'react';
 import SingleView from '../../components/SingleView';
+import PermissionLink from '../../components/PermissionLink';
 import { itemsApi } from '../../services/api';
 
 const ItemView = () => {
@@ -8,7 +9,9 @@ const ItemView = () => {
     { 
       label: 'Company', 
       accessor: 'company',
-      render: (value) => value?.name || 'N/A'
+      render: (value) => value?.id
+        ? <PermissionLink module="companies" to={`/companies/${value.id}`}>{value.name || 'N/A'}</PermissionLink>
+        : (value?.name || 'N/A')
     },
     { 
       label: 'Categories', 
@@ -20,12 +23,16 @@ const ItemView = () => {
     { 
       label: 'Store', 
       accessor: 'store',
-      render: (value) => value?.name || 'N/A'
+      render: (value) => value?.id
+        ? <PermissionLink module="stores" to={`/stores/${value.id}`}>{value.name || 'N/A'}</PermissionLink>
+        : (value?.name || 'N/A')
     },
     { 
       label: 'Shop', 
       accessor: 'shop',
-      render: (value) => value?.name || 'N/A'
+      render: (value) => value?.id
+        ? <PermissionLink module="shops" to={`/shops/${value.id}`}>{value.name || 'N/A'}</PermissionLink>
+        : (value?.name || 'N/A')
     },
     { label: 'Location', accessor: 'location' },
     { 
@@ -94,6 +101,7 @@ const ItemView = () => {
       fetchData={itemsApi.getOne}
       fields={fields}
       basePath="/items"
+      writePermission="items.write"
     />
   );
 };

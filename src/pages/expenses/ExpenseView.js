@@ -14,6 +14,7 @@ const ExpenseView = () => {
       fetchData={expensesApi.getOne}
       fields={fields}
       basePath="/expenses"
+      writePermission="expenses.write"
     />
   );
 };

@@ -6,13 +6,20 @@ import Pagination from './Pagination';
 import FilterPanel from './FilterPanel';
 import CollapsibleFilters from './CollapsibleFilters';
 import { hasPermission } from '../services/session';
+import { clearListingState, compactFilters, readListingState, writeListingState } from '../services/listingFilters';
+import { useShop } from '../contexts/ShopContext';
+import { getViewTenantId } from '../services/session';
 import './Listing.css';
 
-const Listing = ({ 
-  title, 
-  columns, 
-  fetchData, 
+const Listing = ({
+  title,
+  columns,
+  fetchData,
   basePath,
+  createPath,
+  getViewPath,
+  getEditPath,
+  hideEdit = false,
   onDelete,
   showFilters = true,
   renderFilters,
@@ -22,34 +29,34 @@ const Listing = ({
   deletePermission,
 }) => {
   const navigate = useNavigate();
+  const { selectedShop } = useShop();
+  const viewTenantId = getViewTenantId();
+  const stored = readListingState(basePath);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState(stored.filters);
   const [totals, setTotals] = useState(null);
   const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
+    page: stored.page,
+    limit: stored.limit,
     total: 0,
     totalPages: 0,
   });
 
-  useEffect(() => {
-    loadData(pagination.page, pagination.limit, filters);
-  }, []);
-
-  useEffect(() => {
-    if (fetchTotals) {
-      loadTotals(filters);
-    }
-  }, [filters, fetchTotals]);
+  const persist = (nextFilters, page, limit) => {
+    writeListingState(basePath, {
+      filters: compactFilters(nextFilters),
+      page,
+      limit,
+    });
+  };
 
   const loadData = async (page = 1, limit = 10, currentFilters = {}) => {
     try {
       setLoading(true);
-      const result = await fetchData(page, limit, currentFilters);
-      
-      if (result.data && result.total !== undefined) {
-        // Paginated response
+      const result = await fetchData(page, limit, compactFilters(currentFilters));
+
+      if (result && result.data && result.total !== undefined) {
         setData(result.data);
         setPagination({
           page: result.page || page,
@@ -58,12 +65,12 @@ const Listing = ({
           totalPages: result.totalPages || 0,
         });
       } else {
-        // Non-paginated response (fallback)
-        setData(Array.isArray(result) ? result : []);
+        const rows = Array.isArray(result) ? result : [];
+        setData(rows);
         setPagination({
           page: 1,
-          limit: limit,
-          total: Array.isArray(result) ? result.length : 0,
+          limit,
+          total: rows.length,
           totalPages: 1,
         });
       }
@@ -84,7 +91,7 @@ const Listing = ({
   const loadTotals = async (currentFilters = {}) => {
     if (!fetchTotals) return;
     try {
-      const result = await fetchTotals(currentFilters);
+      const result = await fetchTotals(compactFilters(currentFilters));
       setTotals(result);
     } catch (error) {
       console.error('Error loading totals:', error);
@@ -92,30 +99,63 @@ const Listing = ({
     }
   };
 
+  useEffect(() => {
+    const next = readListingState(basePath);
+    setFilters(next.filters);
+    loadData(next.page, next.limit, next.filters);
+    if (fetchTotals) {
+      loadTotals(next.filters);
+    }
+  }, [basePath, selectedShop?.id, viewTenantId]);
+
   const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-    // Reset to page 1 when filters change
-    loadData(1, pagination.limit, newFilters);
+    const next = newFilters || {};
+    setFilters(next);
+    persist(next, 1, pagination.limit);
+    loadData(1, pagination.limit, next);
+    if (fetchTotals) {
+      loadTotals(next);
+    }
   };
 
   const handleClearFilters = () => {
     setFilters({});
+    clearListingState(basePath);
     loadData(1, pagination.limit, {});
+    if (fetchTotals) {
+      loadTotals({});
+    }
   };
 
   const handlePageChange = (newPage) => {
+    persist(filters, newPage, pagination.limit);
     loadData(newPage, pagination.limit, filters);
   };
 
-  const handleCreate = () => {
-    navigate(`${basePath}/create`);
+  const handleRefresh = () => {
+    loadData(pagination.page, pagination.limit, filters);
+    if (fetchTotals) {
+      loadTotals(filters);
+    }
   };
 
-  const handleView = (id) => {
+  const handleCreate = () => {
+    navigate(createPath || `${basePath}/create`);
+  };
+
+  const handleView = (id, row) => {
+    if (getViewPath) {
+      navigate(getViewPath(row || { id }));
+      return;
+    }
     navigate(`${basePath}/${id}`);
   };
 
-  const handleEdit = (id) => {
+  const handleEdit = (id, row) => {
+    if (getEditPath) {
+      navigate(getEditPath(row || { id }));
+      return;
+    }
     navigate(`${basePath}/${id}/edit`);
   };
 
@@ -126,6 +166,9 @@ const Listing = ({
           await onDelete(id);
         }
         await loadData(pagination.page, pagination.limit, filters);
+        if (fetchTotals) {
+          await loadTotals(filters);
+        }
       } catch (error) {
         console.error('Error deleting:', error);
         alert('Failed to delete item');
@@ -139,22 +182,28 @@ const Listing = ({
       <div className="listing-container">
         <div className="listing-header">
           <h1>{title}</h1>
-          {(!writePermission || hasPermission(writePermission)) && (
-            <button onClick={handleCreate} className="listing-create-button">
-              Create New
+          <div className="listing-header-actions">
+            <button type="button" onClick={handleRefresh} className="listing-refresh-button" disabled={loading}>
+              {loading ? 'Refreshing...' : 'Refresh'}
             </button>
-          )}
+            {(!writePermission || hasPermission(writePermission)) && (
+              <button type="button" onClick={handleCreate} className="listing-create-button">
+                Create New
+              </button>
+            )}
+          </div>
         </div>
         {showFilters && (
           <CollapsibleFilters title="Filters">
             {renderFilters ? (
               <div className="listing-filters">
-                {renderFilters(handleFilterChange, filters)}
+                {renderFilters(handleFilterChange, filters, handleClearFilters)}
               </div>
             ) : (
               <FilterPanel
                 onFilterChange={handleFilterChange}
                 onClear={handleClearFilters}
+                currentFilters={filters}
               />
             )}
           </CollapsibleFilters>
@@ -166,7 +215,7 @@ const Listing = ({
           loading={loading}
           emptyMessage={`No ${title} yet`}
           onView={handleView}
-          onEdit={(!writePermission || hasPermission(writePermission)) ? handleEdit : undefined}
+          onEdit={!hideEdit && (!writePermission || hasPermission(writePermission)) ? handleEdit : undefined}
           onDelete={onDelete && (!deletePermission || hasPermission(deletePermission)) ? handleDelete : undefined}
         />
         {pagination.totalPages > 1 && (
@@ -187,9 +236,9 @@ const Listing = ({
           <div className="listing-totals">
             {totalsConfig.map((config, index) => {
               const value = totals[config.key];
-              const displayValue = typeof value === 'number' 
-                ? (config.format === 'currency' 
-                  ? `${value.toFixed(2)}` 
+              const displayValue = typeof value === 'number'
+                ? (config.format === 'currency'
+                  ? `${value.toFixed(2)}`
                   : value.toFixed(config.decimals || 2))
                 : value || '0.00';
               return (
@@ -207,4 +256,3 @@ const Listing = ({
 };
 
 export default Listing;
-

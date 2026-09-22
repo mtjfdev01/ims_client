@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import SingleView from '../../components/SingleView';
 import { storesApi } from '../../services/api';
+import { hasPermission } from '../../services/session';
 
 const StoreView = () => {
   const navigate = useNavigate();
@@ -42,11 +43,11 @@ const StoreView = () => {
   ];
 
   const customActions = [
-    {
+    hasPermission('items') && {
       label: 'View Items',
       onClick: (data, id) => navigate(`/stores/${id}/items`)
     }
-  ];
+  ].filter(Boolean);
 
   return (
     <SingleView
@@ -54,6 +55,7 @@ const StoreView = () => {
       fetchData={storesApi.getOne}
       fields={fields}
       basePath="/stores"
+      writePermission="stores.write"
       customActions={customActions}
     />
   );

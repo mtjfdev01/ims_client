@@ -20,6 +20,7 @@ const CompanyView = () => {
       fetchData={companiesApi.getOne}
       fields={fields}
       basePath="/companies"
+      writePermission="companies.write"
     />
   );
 };

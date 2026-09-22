@@ -4,8 +4,10 @@ import Navigation from '../../components/Navigation';
 import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
-import { salesApi, itemsApi } from '../../services/api';
+import { salesApi, itemsApi, customersApi, unwrapList } from '../../services/api';
 import RequireShop from '../../components/RequireShop';
+import SalePaymentFields from './SalePaymentFields';
+import { buildSalePaymentPayload, emptyPaymentForm, validatePaymentForm } from './salePayment';
 import './SaleCreate.css';
 
 const SaleCreate = () => {
@@ -20,10 +22,13 @@ const SaleCreate = () => {
     }
   ]);
   const [items, setItems] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [payment, setPayment] = useState(emptyPaymentForm());
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadItems();
+    loadCustomers();
   }, []);
 
   const loadItems = async () => {
@@ -72,6 +77,15 @@ const SaleCreate = () => {
       setItems(shopItems);
     } catch (error) {
       console.error('Error loading items:', error);
+    }
+  };
+
+  const loadCustomers = async () => {
+    try {
+      const data = await customersApi.getAll();
+      setCustomers(unwrapList(data));
+    } catch (error) {
+      console.error('Error loading customers:', error);
     }
   };
 
@@ -151,6 +165,9 @@ const SaleCreate = () => {
     }
   };
 
+  const totalAmount = saleItems.reduce((sum, item) => sum + (item.amount || 0), 0);
+  const totalProfit = saleItems.reduce((sum, item) => sum + (item.profit || 0), 0);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
@@ -176,6 +193,12 @@ const SaleCreate = () => {
       }
     }
 
+    const paymentError = validatePaymentForm(payment, totalAmount);
+    if (paymentError) {
+      alert(paymentError);
+      return;
+    }
+
     setLoading(true);
     try {
       const saleData = {
@@ -184,7 +207,8 @@ const SaleCreate = () => {
           quantity: item.quantity,
           profit: item.profit,
           amount: item.amount
-        }))
+        })),
+        ...buildSalePaymentPayload(payment, totalAmount),
       };
 
       await salesApi.create(saleData);
@@ -200,9 +224,6 @@ const SaleCreate = () => {
     value: item.id, 
     label: item.name ? `${item.name} (ID: ${item.id}, Qty: ${item.quantity})` : `Item #${item.id} (Qty: ${item.quantity})` 
   }));
-
-  const totalAmount = saleItems.reduce((sum, item) => sum + (item.amount || 0), 0);
-  const totalProfit = saleItems.reduce((sum, item) => sum + (item.profit || 0), 0);
 
   return (
     <div>
@@ -303,6 +324,13 @@ const SaleCreate = () => {
             <strong>Total Profit:</strong> {totalProfit.toFixed(2)}
           </div>
         </div>
+
+        <SalePaymentFields
+          totalAmount={totalAmount}
+          customers={customers}
+          value={payment}
+          onChange={setPayment}
+        />
 
         <div className="form-actions">
           <button type="button" onClick={() => navigate('/sales')} className="form-button form-button-secondary">

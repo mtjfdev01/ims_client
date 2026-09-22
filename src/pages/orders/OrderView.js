@@ -89,6 +89,7 @@ const OrderView = () => {
       fetchData={ordersApi.getOne}
       fields={fields}
       basePath="/orders"
+      writePermission="orders.write"
     />
   );
 };

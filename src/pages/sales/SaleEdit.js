@@ -4,7 +4,9 @@ import Navigation from '../../components/Navigation';
 import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
-import { salesApi, itemsApi } from '../../services/api';
+import { salesApi, itemsApi, customersApi, unwrapList } from '../../services/api';
+import SalePaymentFields from './SalePaymentFields';
+import { buildSalePaymentPayload, emptyPaymentForm, paymentFormFromSale, validatePaymentForm } from './salePayment';
 import './SaleCreate.css';
 
 const SaleEdit = () => {
@@ -20,12 +22,15 @@ const SaleEdit = () => {
     }
   ]);
   const [items, setItems] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [payment, setPayment] = useState(emptyPaymentForm());
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
     loadData();
     loadItems();
+    loadCustomers();
   }, [id]);
 
   const loadData = async () => {
@@ -43,10 +48,20 @@ const SaleEdit = () => {
         }));
         setSaleItems(mappedItems);
       }
+      setPayment(paymentFormFromSale(data));
     } catch (error) {
       console.error('Error loading sale:', error);
     } finally {
       setLoadingData(false);
+    }
+  };
+
+  const loadCustomers = async () => {
+    try {
+      const data = await customersApi.getAll();
+      setCustomers(unwrapList(data));
+    } catch (error) {
+      console.error('Error loading customers:', error);
     }
   };
 
@@ -163,6 +178,9 @@ const SaleEdit = () => {
     }
   };
 
+  const totalAmount = saleItems.reduce((sum, item) => sum + (item.amount || 0), 0);
+  const totalProfit = saleItems.reduce((sum, item) => sum + (item.profit || 0), 0);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
@@ -188,6 +206,12 @@ const SaleEdit = () => {
       }
     }
 
+    const paymentError = validatePaymentForm(payment, totalAmount);
+    if (paymentError) {
+      alert(paymentError);
+      return;
+    }
+
     setLoading(true);
     try {
       const saleData = {
@@ -196,7 +220,8 @@ const SaleEdit = () => {
           quantity: item.quantity,
           profit: item.profit,
           amount: item.amount
-        }))
+        })),
+        ...buildSalePaymentPayload(payment, totalAmount, { allowClearCustomer: true }),
       };
 
       await salesApi.update(id, saleData);
@@ -223,9 +248,6 @@ const SaleEdit = () => {
     value: item.id, 
     label: item.name ? `${item.name} (ID: ${item.id}, Qty: ${item.quantity})` : `Item #${item.id} (Qty: ${item.quantity})` 
   }));
-
-  const totalAmount = saleItems.reduce((sum, item) => sum + (item.amount || 0), 0);
-  const totalProfit = saleItems.reduce((sum, item) => sum + (item.profit || 0), 0);
 
   return (
     <div>
@@ -324,6 +346,14 @@ const SaleEdit = () => {
             <strong>Total Profit:</strong> {totalProfit.toFixed(2)}
           </div>
         </div>
+
+        <SalePaymentFields
+          totalAmount={totalAmount}
+          customers={customers}
+          value={payment}
+          onChange={setPayment}
+          allowNewCustomer={false}
+        />
 
         <div className="form-actions">
           <button type="button" onClick={() => navigate('/sales')} className="form-button form-button-secondary">

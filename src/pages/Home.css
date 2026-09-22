@@ -64,6 +64,14 @@
   border-top-color: #2196F3;
 }
 
+.dashboard-card-services {
+  border-top-color: #00ACC1;
+}
+
+.dashboard-card-outstanding {
+  border-top-color: #E91E63;
+}
+
 .dashboard-card-purchases {
   border-top-color: #FF9800;
 }

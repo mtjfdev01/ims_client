@@ -11,6 +11,31 @@
   margin-bottom: 20px;
 }
 
+.listing-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.listing-refresh-button {
+  padding: 12px 24px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.listing-refresh-button:hover:not(:disabled) {
+  background-color: #5a6268;
+}
+
+.listing-refresh-button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
 .listing-header h1 {
   margin: 0;
   color: #333;
@@ -90,7 +115,9 @@
     font-size: 24px;
   }
 
-  .listing-create-button {
+  .listing-header-actions,
+  .listing-create-button,
+  .listing-refresh-button {
     width: 100%;
   }
 }

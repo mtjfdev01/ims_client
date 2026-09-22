@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Navigation from '../../components/Navigation';
 import FormField from '../../components/FormField';
 import Input, { EyeIcon } from '../../components/Input';
+import PermissionsModal, { PermissionsIconButton } from '../../components/PermissionsModal';
 import { shopsApi, usersApi } from '../../services/api';
 import './AdminUsers.css';
 import '../../components/Table.css';
@@ -31,6 +32,7 @@ const AdminUsers = () => {
   const [assignShopIds, setAssignShopIds] = useState([]);
   const [resetId, setResetId] = useState(null);
   const [resetPassword, setResetPassword] = useState('');
+  const [permissionsUser, setPermissionsUser] = useState(null);
 
   const selectedTenantId = form.orgMode === 'existing' ? form.tenantId : '';
 
@@ -250,13 +252,14 @@ const AdminUsers = () => {
                   <th>Organization</th>
                   <th>Shops</th>
                   <th>Password</th>
+                  <th>Permissions</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {regularUsers.length === 0 && (
                   <tr>
-                    <td colSpan="7" className="table-empty">No tenant users yet.</td>
+                    <td colSpan="8" className="table-empty">No tenant users yet.</td>
                   </tr>
                 )}
                 {regularUsers.map(user => (
@@ -294,6 +297,15 @@ const AdminUsers = () => {
                           <EyeIcon off={!!revealed[user.id]} />
                         </button>
                       </div>
+                    </td>
+                    <td>
+                      <PermissionsIconButton
+                        onClick={() => {
+                          setError('');
+                          setSuccess('');
+                          setPermissionsUser(user);
+                        }}
+                      />
                     </td>
                     <td>
                       <div className="admin-actions">
@@ -352,6 +364,16 @@ const AdminUsers = () => {
           </div>
         </div>
       </div>
+      {permissionsUser && (
+        <PermissionsModal
+          user={permissionsUser}
+          onClose={() => setPermissionsUser(null)}
+          onSaved={(updated) => {
+            setSuccess(`Saved access for ${updated.name}`);
+            setPermissionsUser((prev) => (prev ? { ...prev, permissions: updated.permissions } : prev));
+          }}
+        />
+      )}
     </div>
   );
 };

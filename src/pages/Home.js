@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
-import { expensesApi, purchasesApi, salesApi, shopsApi, unwrapList } from '../services/api';
+import { expensesApi, installmentsApi, purchasesApi, salesApi, servicesApi, shopsApi, unwrapList } from '../services/api';
+import { hasPermission } from '../services/session';
+import './installments/Installments.css';
 import { useShop } from '../contexts/ShopContext';
 import CollapsibleFilters from '../components/CollapsibleFilters';
 import '../components/FilterPanel.css';
@@ -21,16 +23,25 @@ const Home = () => {
   const [error, setError] = useState('');
   const [stats, setStats] = useState({
     sales: 0,
+    services: 0,
+    outstanding: 0,
     purchases: 0,
     expenses: 0,
     profit: 0,
     stockValue: 0,
+    installments: 0,
+    installmentsPending: 0,
+    installmentsDueSoon: 0,
+    installmentsWeek: 0,
   });
 
   const loadStockValue = useCallback(async () => {
     if (selectedShop?.id) {
       const result = await shopsApi.getAssetValue(selectedShop.id);
       return Number(result?.assetValue || 0);
+    }
+    if (!hasPermission('shops')) {
+      return 0;
     }
     const shops = unwrapList(await shopsApi.getAll());
     if (!shops.length) {
@@ -63,18 +74,44 @@ const Home = () => {
       query.shopId = selectedShop.id;
     }
     try {
-      const [salesTotals, purchaseTotals, expenseTotals, stockValue] = await Promise.all([
-        salesApi.getTotals(query, selectedShop?.id),
-        purchasesApi.getTotals(query),
-        expensesApi.getTotals(query),
-        loadStockValue(),
+      const canSales = hasPermission('sales');
+      const canServices = hasPermission('services');
+      const canInstallments = hasPermission('installments');
+      const canPurchases = hasPermission('purchases');
+      const canExpenses = hasPermission('expenses');
+      const canStock = hasPermission('items') || hasPermission('shops');
+      const [salesTotals, serviceTotals, installmentTotals, purchaseTotals, expenseTotals, stockValue] = await Promise.all([
+        canSales ? salesApi.getTotals(query, selectedShop?.id) : Promise.resolve({}),
+        canServices ? servicesApi.getTotals(query, selectedShop?.id) : Promise.resolve({}),
+        canInstallments ? installmentsApi.getTotals(query, selectedShop?.id) : Promise.resolve({}),
+        canPurchases ? purchasesApi.getTotals(query) : Promise.resolve({}),
+        canExpenses ? expensesApi.getTotals(query) : Promise.resolve({}),
+        canStock ? loadStockValue() : Promise.resolve(0),
       ]);
+      const hasDate = !!(filters.date || filters.dateFrom || filters.dateTo);
+      const installmentProfit = canInstallments
+        ? (hasDate
+          ? Number(installmentTotals?.periodProfit ?? installmentTotals?.profit ?? 0)
+          : Number(installmentTotals?.profit || 0))
+        : 0;
       setStats({
-        sales: Number(salesTotals?.totalAmount || 0),
-        purchases: Number(purchaseTotals?.total || 0),
-        expenses: Number(expenseTotals?.total || 0),
-        profit: Number(salesTotals?.totalProfit || 0),
+        sales: canSales ? Number(salesTotals?.totalAmount || 0) : 0,
+        services: canServices ? Number(serviceTotals?.totalAmount || 0) : 0,
+        outstanding:
+          (canSales ? Number(salesTotals?.outstanding || 0) : 0)
+          + (canServices ? Number(serviceTotals?.outstanding || 0) : 0)
+          + (canInstallments ? Number(installmentTotals?.pending || 0) : 0),
+        purchases: canPurchases ? Number(purchaseTotals?.total || 0) : 0,
+        expenses: canExpenses ? Number(expenseTotals?.total || 0) : 0,
+        profit:
+          (canSales ? Number(salesTotals?.totalProfit || 0) : 0)
+          + (canServices ? Number(serviceTotals?.totalProfit || 0) : 0)
+          + installmentProfit,
         stockValue: Number(stockValue || 0),
+        installments: installmentProfit,
+        installmentsPending: Number(installmentTotals?.pending || 0),
+        installmentsDueSoon: Number(installmentTotals?.dueSoon || 0),
+        installmentsWeek: Number(installmentTotals?.completedThisWeek || 0),
       });
     } catch (err) {
       setError(err.message || 'Failed to load dashboard');
@@ -115,13 +152,31 @@ const Home = () => {
       ? `Range: ${filters.dateFrom || '...'} to ${filters.dateTo || '...'}`
       : 'All time';
 
+  const canSales = hasPermission('sales');
+  const canServices = hasPermission('services');
+  const canInstallments = hasPermission('installments');
+  const canPurchases = hasPermission('purchases');
+  const canExpenses = hasPermission('expenses');
+  const canStock = hasPermission('items') || hasPermission('shops');
+  const outstandingParts = [
+    canSales && 'sales',
+    canServices && 'services',
+    canInstallments && 'installments',
+  ].filter(Boolean);
   const cards = [
-    { key: 'sales', label: 'Sales', value: stats.sales, hint: periodLabel },
-    { key: 'purchases', label: 'Purchase', value: stats.purchases, hint: periodLabel },
-    { key: 'expenses', label: 'Expense', value: stats.expenses, hint: periodLabel },
-    { key: 'profit', label: 'Profit', value: stats.profit, hint: periodLabel },
-    { key: 'stockValue', label: 'Stock Value', value: stats.stockValue, hint: 'Current inventory' },
-  ];
+    canSales && { key: 'sales', label: 'Sales', value: stats.sales, hint: periodLabel },
+    canServices && { key: 'services', label: 'Services', value: stats.services, hint: periodLabel },
+    outstandingParts.length > 0 && {
+      key: 'outstanding',
+      label: 'Outstanding',
+      value: stats.outstanding,
+      hint: `Unpaid ${outstandingParts.join(', ')}`,
+    },
+    canPurchases && { key: 'purchases', label: 'Purchase', value: stats.purchases, hint: periodLabel },
+    canExpenses && { key: 'expenses', label: 'Expense', value: stats.expenses, hint: periodLabel },
+    outstandingParts.length > 0 && { key: 'profit', label: 'Profit', value: stats.profit, hint: periodLabel },
+    canStock && { key: 'stockValue', label: 'Stock Value', value: stats.stockValue, hint: 'Current inventory' },
+  ].filter(Boolean);
 
   return (
     <div>
@@ -183,6 +238,13 @@ const Home = () => {
         {error && <div className="dashboard-error">{error}</div>}
 
         <div className="dashboard-cards">
+          {cards.length === 0 && !canInstallments && !loading && (
+            <div className="dashboard-card">
+              <div className="dashboard-card-label">No module totals</div>
+              <div className="dashboard-card-value">—</div>
+              <div className="dashboard-card-hint">Your account has no money-module access</div>
+            </div>
+          )}
           {cards.map((card) => (
             <div key={card.key} className={`dashboard-card dashboard-card-${card.key}`}>
               <div className="dashboard-card-label">{card.label}</div>
@@ -191,6 +253,26 @@ const Home = () => {
             </div>
           ))}
         </div>
+
+        {canInstallments && (
+          <>
+            <h2 className="dashboard-section-title">Installments</h2>
+            <div className="dashboard-cards">
+              {[
+                { key: 'installments', label: 'Collected profit', value: stats.installments, hint: 'Down payments + dues collected' },
+                { key: 'installmentsPending', label: 'Pending', value: stats.installmentsPending, hint: 'Due today or overdue' },
+                { key: 'installmentsDueSoon', label: 'Due in 2 days', value: stats.installmentsDueSoon, hint: 'Call list' },
+                { key: 'installmentsWeek', label: 'Completed this week', value: stats.installmentsWeek, hint: 'Paid this week' },
+              ].map((card) => (
+                <div key={card.key} className={`dashboard-card dashboard-card-${card.key}`}>
+                  <div className="dashboard-card-label">{card.label}</div>
+                  <div className="dashboard-card-value">{loading ? '...' : money(card.value)}</div>
+                  <div className="dashboard-card-hint">{card.hint}</div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Listing from '../../components/Listing';
-import Navigation from '../../components/Navigation';
 import { storesApi, itemsApi } from '../../services/api';
+import { hasPermission } from '../../services/session';
 import './StoreItems.css';
 
 const StoreItems = () => {
@@ -65,23 +65,22 @@ const StoreItems = () => {
       accessor: 'minimumSalePrice',
       render: (value) => typeof value === 'string' ? `${parseFloat(value).toFixed(2)}` : `${value?.toFixed(2) || '0.00'}`
     },
-    {
-      header: 'Actions',
+    ...(hasPermission('issues') ? [{
+      header: 'Stock Transfer',
       accessor: 'id',
-      render: (value, row) => (
+      render: (value) => (
         <button
           onClick={() => navigate(`/items/transfer?itemId=${value}&fromStoreId=${id}`)}
           className="transfer-button"
         >
-          Transfer to Shop
+          Stock Transfer to Shop
         </button>
       )
-    }
+    }] : [])
   ];
 
   return (
     <div>
-      <Navigation />
       <div className="listing-container">
         <div className="listing-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -109,6 +108,8 @@ const StoreItems = () => {
           columns={columns}
           fetchData={() => storesApi.getItems(id)}
           basePath="/items"
+          writePermission="items.write"
+          deletePermission="items.delete"
           onDelete={itemsApi.delete}
         />
       </div>

@@ -68,8 +68,12 @@ const PurchaseList = () => {
       deletePermission="purchases.delete"
       fetchTotals={purchasesApi.getTotals}
       totalsConfig={totalsConfig}
-      renderFilters={(handleApplyFilters) => (
-        <PurchaseFilterPanel onApplyFilters={handleApplyFilters} />
+      renderFilters={(handleFilterChange, currentFilters, handleClear) => (
+        <PurchaseFilterPanel
+          onFilterChange={handleFilterChange}
+          onClear={handleClear}
+          currentFilters={currentFilters}
+        />
       )}
     />
   );

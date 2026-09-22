@@ -27,42 +27,26 @@ export function isTenantAdmin(user = getUser()) {
   return user?.role === 'tenant_admin';
 }
 
-const ROLE_PERMISSIONS = {
-  tenant_admin: [
-    'shops.read', 'shops.write',
-    'stores.read', 'stores.write',
-    'companies.read', 'companies.write', 'companies.delete',
-    'categories.read', 'categories.write', 'categories.delete',
-    'items.read', 'items.write', 'items.delete', 'items.transfer',
-    'sales.read', 'sales.write', 'sales.delete',
-    'orders.read', 'orders.write', 'orders.delete',
-    'purchases.read', 'purchases.write', 'purchases.delete',
-    'expenses.read', 'expenses.write', 'expenses.delete',
-    'issues.read', 'issues.write', 'issues.delete',
-  ],
-  user: [
-    'shops.read',
-    'stores.read',
-    'companies.read', 'companies.write', 'companies.delete',
-    'categories.read', 'categories.write', 'categories.delete',
-    'items.read', 'items.write', 'items.delete', 'items.transfer',
-    'sales.read', 'sales.write', 'sales.delete',
-    'orders.read', 'orders.write', 'orders.delete',
-    'purchases.read', 'purchases.write', 'purchases.delete',
-    'expenses.read', 'expenses.write', 'expenses.delete',
-    'issues.read', 'issues.write', 'issues.delete',
-  ],
-};
+export function getUserModules(user = getUser()) {
+  return Array.isArray(user?.permissions) ? user.permissions : [];
+}
 
 export function hasPermission(permission, user = getUser()) {
-  if (!user) {
+  if (!getToken() || !user) {
     return false;
   }
   if (user.role === 'super_admin') {
     return true;
   }
-  const fromRole = ROLE_PERMISSIONS[user.role] || [];
-  return fromRole.includes(permission);
+  const modules = getUserModules(user);
+  if (!permission) {
+    return false;
+  }
+  if (modules.includes(permission)) {
+    return true;
+  }
+  const moduleKey = String(permission).split('.')[0];
+  return modules.some((entry) => entry === moduleKey || String(entry).startsWith(`${moduleKey}.`));
 }
 
 export function isAuthenticated() {

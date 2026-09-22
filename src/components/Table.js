@@ -39,7 +39,7 @@ const Table = ({ columns, data = [], onEdit, onDelete, onView, loading = false, 
                   <div className="table-actions-inner">
                     {onView && (
                       <button
-                        onClick={() => onView(row.id || rowIndex)}
+                        onClick={() => onView(row.id || rowIndex, row)}
                         className="table-button table-button-view"
                       >
                         View
@@ -47,7 +47,7 @@ const Table = ({ columns, data = [], onEdit, onDelete, onView, loading = false, 
                     )}
                     {onEdit && (
                       <button
-                        onClick={() => onEdit(row.id || rowIndex)}
+                        onClick={() => onEdit(row.id || rowIndex, row)}
                         className="table-button table-button-edit"
                       >
                         Edit
@@ -64,7 +64,7 @@ const Table = ({ columns, data = [], onEdit, onDelete, onView, loading = false, 
                     {onView && (
                       <button
                         type="button"
-                        onClick={() => onView(row.id || rowIndex)}
+                        onClick={() => onView(row.id || rowIndex, row)}
                         className="table-button-eye"
                         aria-label="View"
                         title="View"

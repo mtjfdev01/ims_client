@@ -1,5 +1,6 @@
 import React from 'react';
 import SingleView from '../../components/SingleView';
+import PermissionLink from '../../components/PermissionLink';
 import { purchasesApi } from '../../services/api';
 
 const PurchaseView = () => {
@@ -7,7 +8,12 @@ const PurchaseView = () => {
     {
       label: 'Item',
       accessor: 'item',
-      render: (value) => value?.name ? `${value.name} (ID: ${value.id})` : `Item #${value?.id || 'N/A'}`
+      render: (value) => {
+        const label = value?.name ? `${value.name} (ID: ${value.id})` : `Item #${value?.id || 'N/A'}`;
+        return value?.id
+          ? <PermissionLink module="items" to={`/items/${value.id}`}>{label}</PermissionLink>
+          : label;
+      }
     },
     { 
       label: 'Purchase Price (per unit)', 
@@ -58,6 +64,7 @@ const PurchaseView = () => {
       fetchData={purchasesApi.getOne}
       fields={fields}
       basePath="/purchases"
+      writePermission="purchases.write"
     />
   );
 };

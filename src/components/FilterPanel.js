@@ -1,32 +1,37 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import FilterActions from './FilterActions';
 import './FilterPanel.css';
 
-const FilterPanel = ({ onFilterChange, onApplyFilters, onClear }) => {
+const emptyFilters = {
+  date: '',
+  dateFrom: '',
+  dateTo: '',
+  search: '',
+};
+
+const FilterPanel = ({ onFilterChange, onApplyFilters, onClear, currentFilters = {}, searchPlaceholder = 'Search...' }) => {
   const applyFilters = onFilterChange || onApplyFilters;
-  const [filters, setFilters] = useState({
-    date: '',
-    dateFrom: '',
-    dateTo: '',
-    search: ''
-  });
+  const [filters, setFilters] = useState({ ...emptyFilters, ...currentFilters });
+
+  useEffect(() => {
+    setFilters({ ...emptyFilters, ...currentFilters });
+  }, [currentFilters.date, currentFilters.dateFrom, currentFilters.dateTo, currentFilters.search]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     const newFilters = {
       ...filters,
-      [name]: value
+      [name]: value,
     };
-    
-    // If single date is selected, clear date range
+
     if (name === 'date' && value) {
       newFilters.dateFrom = '';
       newFilters.dateTo = '';
     }
-    // If date range is selected, clear single date
     if ((name === 'dateFrom' || name === 'dateTo') && (newFilters.dateFrom || newFilters.dateTo)) {
       newFilters.date = '';
     }
-    
+
     setFilters(newFilters);
     if (applyFilters) {
       applyFilters(newFilters);
@@ -34,17 +39,11 @@ const FilterPanel = ({ onFilterChange, onApplyFilters, onClear }) => {
   };
 
   const handleClear = () => {
-    const clearedFilters = {
-      date: '',
-      dateFrom: '',
-      dateTo: '',
-      search: ''
-    };
-    setFilters(clearedFilters);
+    setFilters(emptyFilters);
     if (onClear) {
       onClear();
     } else if (applyFilters) {
-      applyFilters(clearedFilters);
+      applyFilters(emptyFilters);
     }
   };
 
@@ -52,7 +51,6 @@ const FilterPanel = ({ onFilterChange, onApplyFilters, onClear }) => {
     <div className="filter-panel">
       <div className="filter-panel-header">
         <h3>Filters</h3>
-        <button onClick={handleClear} className="filter-clear-button">Clear All</button>
       </div>
       <div className="filter-panel-body">
         <div className="filter-row">
@@ -97,11 +95,12 @@ const FilterPanel = ({ onFilterChange, onApplyFilters, onClear }) => {
               name="search"
               value={filters.search}
               onChange={handleChange}
-              placeholder="Search..."
+              placeholder={searchPlaceholder}
               className="filter-input"
             />
           </div>
         </div>
+        <FilterActions onClear={handleClear} />
       </div>
     </div>
   );

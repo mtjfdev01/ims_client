@@ -28,6 +28,11 @@ const apiCall = async (endpoint, options = {}) => {
     if (options.filters.search && options.filters.search.trim()) params.append('search', options.filters.search.trim());
     if (options.filters.filterType && options.filters.filterType.trim()) params.append('filterType', options.filters.filterType.trim());
     if (options.filters.tenantId) params.append('tenantId', options.filters.tenantId);
+    if (options.filters.paymentStatus) params.append('paymentStatus', options.filters.paymentStatus);
+    if (options.filters.dueToday) params.append('dueToday', options.filters.dueToday);
+    if (options.filters.customerId) params.append('customerId', options.filters.customerId);
+    if (options.filters.kind) params.append('kind', options.filters.kind);
+    if (options.filters.installmentStatus) params.append('installmentStatus', options.filters.installmentStatus);
   }
   
   if (options.storeId) params.append('storeId', options.storeId);
@@ -130,6 +135,12 @@ export const usersApi = {
   archive: (id) => apiCall(`/users/${id}`, { method: 'DELETE' }),
 };
 
+export const userPermissionsApi = {
+  listModules: () => apiCall('/user-permissions/modules'),
+  list: (tenantId) => apiCall('/user-permissions', { tenantId }),
+  set: (userId, modules) => apiCall(`/user-permissions/${userId}`, { method: 'PUT', body: { modules } }),
+};
+
 export const storesApi = {
   getAll: (page, limit, filters) => apiCall('/stores', { page, limit, filters }),
   getOne: (id) => apiCall(`/stores/${id}`),
@@ -159,10 +170,13 @@ export const companiesApi = {
 export const itemsApi = {
   getAll: (page, limit, filters) => {
     const options = { page, limit };
+    const shopId = resolveShopId(filters);
     if (filters) {
       options.filters = filters;
       if (filters.storeId) options.storeId = filters.storeId;
-      if (filters.shopId) options.shopId = filters.shopId;
+    }
+    if (shopId) {
+      options.shopId = shopId;
     }
     return apiCall('/items', options);
   },
@@ -202,7 +216,91 @@ export const salesApi = {
     return apiCall('/sales', { method: 'POST', body: data });
   },
   update: (id, data) => apiCall(`/sales/${id}`, { method: 'PATCH', body: data }),
+  addPayment: (id, data) => apiCall(`/sales/${id}/payments`, { method: 'POST', body: data }),
   delete: (id) => apiCall(`/sales/${id}`, { method: 'DELETE' }),
+};
+
+export const servicesApi = {
+  getAll: (page, limit, filters) => {
+    const options = { page, limit, filters };
+    const shopId = resolveShopId(filters);
+    if (shopId) {
+      options.shopId = shopId;
+    }
+    return apiCall('/services', options);
+  },
+  getOne: (id) => apiCall(`/services/${id}`),
+  getTotals: (filters, shopId) => {
+    const options = { filters };
+    options.shopId = shopId ?? resolveShopId(filters);
+    return apiCall('/services/totals', options);
+  },
+  create: (data) => {
+    const shopId = getSelectedShopId();
+    if (shopId && !data.shopId) {
+      data.shopId = shopId;
+    }
+    return apiCall('/services', { method: 'POST', body: data });
+  },
+  update: (id, data) => apiCall(`/services/${id}`, { method: 'PATCH', body: data }),
+  addPayment: (id, data) => apiCall(`/services/${id}/payments`, { method: 'POST', body: data }),
+  delete: (id) => apiCall(`/services/${id}`, { method: 'DELETE' }),
+};
+
+export const installmentsApi = {
+  getAll: (page, limit, filters) => {
+    const options = { page, limit, filters };
+    const shopId = resolveShopId(filters);
+    if (shopId) {
+      options.shopId = shopId;
+    }
+    return apiCall('/installments', options);
+  },
+  getTotals: (filters, shopId) => {
+    const options = { filters };
+    options.shopId = shopId ?? resolveShopId(filters);
+    return apiCall('/installments/totals', options);
+  },
+  getPlans: (page, limit, filters) => {
+    const options = { page, limit, filters };
+    const shopId = resolveShopId(filters);
+    if (shopId) {
+      options.shopId = shopId;
+    }
+    return apiCall('/installments/plans', options);
+  },
+  getPlan: (id) => apiCall(`/installments/plans/${id}`),
+  createPlan: (data) => {
+    const shopId = getSelectedShopId();
+    if (shopId && !data.shopId) {
+      data.shopId = shopId;
+    }
+    return apiCall('/installments/plans', { method: 'POST', body: data });
+  },
+  updatePlan: (id, data) => apiCall(`/installments/plans/${id}`, { method: 'PATCH', body: data }),
+  deletePlan: (id) => apiCall(`/installments/plans/${id}`, { method: 'DELETE' }),
+  payDue: (id, data) => apiCall(`/installments/dues/${id}/pay`, { method: 'POST', body: data }),
+};
+
+export const customersApi = {
+  getAll: (page, limit, filters) => {
+    const options = { page, limit, filters };
+    const shopId = resolveShopId(filters);
+    if (shopId) {
+      options.shopId = shopId;
+    }
+    return apiCall('/customers', options);
+  },
+  getOne: (id) => apiCall(`/customers/${id}`),
+  create: (data) => {
+    const shopId = getSelectedShopId();
+    if (shopId && !data.shopId) {
+      data.shopId = shopId;
+    }
+    return apiCall('/customers', { method: 'POST', body: data });
+  },
+  update: (id, data) => apiCall(`/customers/${id}`, { method: 'PATCH', body: data }),
+  delete: (id) => apiCall(`/customers/${id}`, { method: 'DELETE' }),
 };
 
 export const ordersApi = {

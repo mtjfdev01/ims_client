@@ -37,6 +37,63 @@
   border-bottom: none;
 }
 
+.payment-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.payment-badge-completed {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.payment-badge-pending {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.payment-badge-partial {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.sale-record-payment {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.sale-record-payment h3 {
+  margin: 0 0 12px;
+}
+
+.sale-record-payment .form-fields-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sale-record-payment label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sale-record-payment input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .sale-items-table {

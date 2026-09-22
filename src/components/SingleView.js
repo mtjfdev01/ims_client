@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navigation from './Navigation';
+import { hasPermission } from '../services/session';
 import './SingleView.css';
 
-const SingleView = ({ title, fetchData, fields, basePath, customActions }) => {
+const SingleView = ({ title, fetchData, fields, basePath, customActions, writePermission }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [data, setData] = useState(null);
@@ -68,9 +69,11 @@ const SingleView = ({ title, fetchData, fields, basePath, customActions }) => {
             <button onClick={handleBack} className="single-view-button">
               Back
             </button>
-            <button onClick={handleEdit} className="single-view-button single-view-button-primary">
-              Edit
-            </button>
+            {(!writePermission || hasPermission(writePermission)) && (
+              <button onClick={handleEdit} className="single-view-button single-view-button-primary">
+                Edit
+              </button>
+            )}
           </div>
         </div>
         <div className="single-view-content">

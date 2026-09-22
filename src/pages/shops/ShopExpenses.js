@@ -1,7 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Listing from '../../components/Listing';
-import Navigation from '../../components/Navigation';
 import { expensesApi, shopsApi } from '../../services/api';
 import './ShopExpenses.css';
 
@@ -30,7 +29,6 @@ const ShopExpenses = () => {
 
   return (
     <div>
-      <Navigation />
       <div className="listing-container">
         <div className="listing-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -45,6 +43,8 @@ const ShopExpenses = () => {
           columns={columns}
           fetchData={() => expensesApi.getAll(undefined, undefined, { shopId: id })}
           basePath="/expenses"
+          writePermission="expenses.write"
+          deletePermission="expenses.delete"
           onDelete={expensesApi.delete}
         />
       </div>

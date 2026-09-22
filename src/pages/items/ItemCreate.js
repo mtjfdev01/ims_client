@@ -6,6 +6,7 @@ import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import { itemsApi, companiesApi, categoriesApi, storesApi, shopsApi, unwrapList } from '../../services/api';
 import { useShop } from '../../contexts/ShopContext';
+import RequireShop from '../../components/RequireShop';
 import { getAssignedShops, getUser } from '../../services/session';
 
 const ItemCreate = () => {
@@ -174,6 +175,7 @@ const ItemCreate = () => {
   return (
     <div>
       <Navigation />
+      <RequireShop block={user?.role === 'user'}>
       <FormWrapper title="Create Item" onSubmit={handleSubmit}>
         <div className="form-fields-row">
           <FormField label="Name" htmlFor="name" required>
@@ -288,6 +290,7 @@ const ItemCreate = () => {
           </button>
         </div>
       </FormWrapper>
+      </RequireShop>
     </div>
   );
 };

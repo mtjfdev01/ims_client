@@ -53,8 +53,12 @@ const OrderList = () => {
       onDelete={ordersApi.delete}
       writePermission="orders.write"
       deletePermission="orders.delete"
-      renderFilters={(handleApplyFilters) => (
-        <FilterPanel onApplyFilters={handleApplyFilters} />
+      renderFilters={(handleFilterChange, currentFilters, handleClear) => (
+        <FilterPanel
+          onFilterChange={handleFilterChange}
+          onClear={handleClear}
+          currentFilters={currentFilters}
+        />
       )}
     />
   );

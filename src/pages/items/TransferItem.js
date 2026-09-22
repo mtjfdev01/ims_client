@@ -156,7 +156,7 @@ const TransferItem = () => {
       }
     } catch (error) {
       console.error('Error transferring item:', error);
-      alert('Failed to transfer item: ' + (error.message || 'Unknown error'));
+      alert('Failed to save stock transfer: ' + (error.message || 'Unknown error'));
       setLoading(false);
     }
   };
@@ -167,7 +167,7 @@ const TransferItem = () => {
   return (
     <div>
       <Navigation />
-      <FormWrapper title="Transfer Item" onSubmit={handleSubmit}>
+      <FormWrapper title="Stock Transfer" onSubmit={handleSubmit}>
         <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#f0f0f0', borderRadius: '4px' }}>
           <div><strong>Item ID:</strong> {formData.itemId}</div>
           {itemData && (
@@ -223,7 +223,7 @@ const TransferItem = () => {
             type="number"
             id="quantity"
             name="quantity"
-            placeholder="Quantity to Transfer"
+            placeholder="Quantity to move"
             value={formData.quantity}
             onChange={handleChange}
             min="1"
@@ -265,7 +265,7 @@ const TransferItem = () => {
             Cancel
           </button>
           <button type="submit" className="form-button form-button-primary" disabled={loading}>
-            {loading ? 'Transferring...' : 'Transfer Item'}
+            {loading ? 'Saving...' : 'Save Stock Transfer'}
           </button>
         </div>
       </FormWrapper>
