@@ -47,14 +47,22 @@
 }
 
 .table-button {
-  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
-  line-height: 1.2;
-  white-space: nowrap;
-  transition: background-color 0.3s;
+  color: inherit;
+  line-height: 0;
+  transition: background-color 0.3s, transform 0.15s;
+}
+
+.table-button:hover {
+  transform: translateY(-1px);
 }
 
 .table-button-view {
@@ -84,10 +92,6 @@
   background-color: #c82333;
 }
 
-.table-button-eye {
-  display: none;
-}
-
 @media (max-width: 768px) {
   .table-container {
     overflow-x: auto;
@@ -96,26 +100,6 @@
 
   .common-table {
     min-width: 720px;
-  }
-
-  .table-button-view,
-  .table-button-edit,
-  .table-button-delete {
-    display: none;
-  }
-
-  .table-button-eye {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    border: none;
-    border-radius: 4px;
-    background: transparent;
-    color: #333;
-    cursor: pointer;
   }
 
   .common-table thead th:last-child,

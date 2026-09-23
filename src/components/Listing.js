@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Table from './Table';
 import Navigation from './Navigation';
@@ -34,6 +34,7 @@ const Listing = ({
   const stored = readListingState(basePath);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const loadRequest = useRef(0);
   const [filters, setFilters] = useState(stored.filters);
   const [totals, setTotals] = useState(null);
   const [pagination, setPagination] = useState({
@@ -52,9 +53,13 @@ const Listing = ({
   };
 
   const loadData = async (page = 1, limit = 10, currentFilters = {}) => {
+    const requestId = ++loadRequest.current;
+    setLoading(true);
     try {
-      setLoading(true);
       const result = await fetchData(page, limit, compactFilters(currentFilters));
+      if (requestId !== loadRequest.current) {
+        return;
+      }
 
       if (result && result.data && result.total !== undefined) {
         setData(result.data);
@@ -75,6 +80,9 @@ const Listing = ({
         });
       }
     } catch (error) {
+      if (requestId !== loadRequest.current) {
+        return;
+      }
       console.error('Error loading data:', error);
       setData([]);
       setPagination({
@@ -84,7 +92,9 @@ const Listing = ({
         totalPages: 0,
       });
     } finally {
-      setLoading(false);
+      if (requestId === loadRequest.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -213,7 +223,7 @@ const Listing = ({
           columns={columns}
           data={data}
           loading={loading}
-          emptyMessage={`No ${title} yet`}
+          emptyMessage={title ? `No ${title} yet` : 'No records yet'}
           onView={handleView}
           onEdit={!hideEdit && (!writePermission || hasPermission(writePermission)) ? handleEdit : undefined}
           onDelete={onDelete && (!deletePermission || hasPermission(deletePermission)) ? handleDelete : undefined}

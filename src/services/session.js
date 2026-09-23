@@ -61,11 +61,35 @@ export function hasSingleAssignedShop(user = getUser()) {
   return user?.role === 'user' && getAssignedShops(user).length === 1;
 }
 
+const HOME_PATHS = [
+  ['dashboard', '/home'],
+  ['sales', '/sales'],
+  ['services', '/services'],
+  ['installments', '/installments'],
+  ['customers', '/customers'],
+  ['items', '/items'],
+  ['issues', '/stock-transfers'],
+  ['categories', '/categories'],
+  ['companies', '/companies'],
+  ['purchases', '/purchases'],
+  ['expenses', '/expenses'],
+  ['shops', '/shops'],
+  ['stores', '/stores'],
+  ['users', '/permissions'],
+];
+
 export function defaultHomePath(user = getUser()) {
   if (!user) {
     return '/';
   }
-  return '/home';
+  const match = HOME_PATHS.find(([module]) => hasPermission(module, user));
+  if (!match) {
+    return isSuperAdmin(user) ? '/admin/users' : '/';
+  }
+  if (match[0] === 'users' && isSuperAdmin(user)) {
+    return '/admin/users';
+  }
+  return match[1];
 }
 
 export function getViewTenantId() {

@@ -85,17 +85,12 @@ import ExpenseCreate from './pages/expenses/ExpenseCreate';
 import ExpenseView from './pages/expenses/ExpenseView';
 import ExpenseEdit from './pages/expenses/ExpenseEdit';
 import AdminUsers from './pages/admin/AdminUsers';
+import UserView from './pages/admin/UserView';
+import UserEdit from './pages/admin/UserEdit';
 import UserPermissions from './pages/permissions/UserPermissions';
 import { defaultHomePath, getToken, hasPermission, isAuthenticated, isSuperAdmin, isTenantAdmin } from './services/session';
 
 import './App.css';
-
-const RequireAuth = ({ children }) => {
-  if (!getToken() || !isAuthenticated()) {
-    return <Navigate to="/" replace />;
-  }
-  return children;
-};
 
 const RequireSuperAdmin = ({ children }) => {
   if (!getToken() || !isAuthenticated()) {
@@ -135,8 +130,10 @@ function App() {
         <div className="App">
           <Routes>
           <Route path="/" element={<Auth />} />
-          <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
+          <Route path="/home" element={<RequirePermission permission="dashboard"><Home /></RequirePermission>} />
           <Route path="/admin/users" element={<RequireSuperAdmin><AdminUsers /></RequireSuperAdmin>} />
+          <Route path="/admin/users/:id/edit" element={<RequireSuperAdmin><UserEdit /></RequireSuperAdmin>} />
+          <Route path="/admin/users/:id" element={<RequireSuperAdmin><UserView /></RequireSuperAdmin>} />
           <Route path="/permissions" element={<RequirePermissionsAdmin><UserPermissions /></RequirePermissionsAdmin>} />
           
           {/* Shops Routes */}

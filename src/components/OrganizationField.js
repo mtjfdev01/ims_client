@@ -5,12 +5,17 @@ import { isSuperAdmin } from '../services/session';
 
 const OrganizationField = ({ orgMode, tenantId, tenantName, onChange }) => {
   const [tenants, setTenants] = useState([]);
+  const [loadingTenants, setLoadingTenants] = useState(isSuperAdmin());
 
   useEffect(() => {
     if (!isSuperAdmin()) {
       return;
     }
-    usersApi.getTenants().then((rows) => setTenants(rows || [])).catch(() => setTenants([]));
+    setLoadingTenants(true);
+    usersApi.getTenants()
+      .then((rows) => setTenants(rows || []))
+      .catch(() => setTenants([]))
+      .finally(() => setLoadingTenants(false));
   }, []);
 
   if (!isSuperAdmin()) {
@@ -40,7 +45,9 @@ const OrganizationField = ({ orgMode, tenantId, tenantName, onChange }) => {
       ) : (
         <FormField label="Select organization" htmlFor="tenantId" required>
           <select id="tenantId" name="tenantId" value={tenantId} onChange={onChange} required>
-            <option value="">{tenants.length ? 'Select organization' : 'No organizations yet — create one'}</option>
+            <option value="">
+              {loadingTenants ? 'Loading organizations...' : (tenants.length ? 'Select organization' : 'No organizations yet — create one')}
+            </option>
             {tenants.map(tenant => (
               <option key={tenant.id} value={tenant.id}>{tenant.name}</option>
             ))}

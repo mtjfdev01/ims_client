@@ -99,3 +99,12 @@
 .single-view-button-secondary:hover {
   background-color: #138496;
 }
+
+.single-view-button-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.single-view-button-danger:hover {
+  background-color: #c82333;
+}

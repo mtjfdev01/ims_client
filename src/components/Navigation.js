@@ -103,7 +103,7 @@ const Navigation = () => {
     }
 
     const groups = [
-      { title: 'Overview', items: [{ path: '/home', label: 'Dashboard', icon: 'dashboard' }, ...adminItems] },
+      { title: 'Overview', items: [{ path: '/home', label: 'Dashboard', module: 'dashboard', icon: 'dashboard' }, ...adminItems] },
       {
         title: 'Business',
         items: [

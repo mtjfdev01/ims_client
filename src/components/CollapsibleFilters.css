@@ -1,43 +1,29 @@
 .collapsible-filters-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.collapsible-filters-toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4CAF50;
+}
+
+.collapsible-filters .filter-panel-header h3 {
   display: none;
 }
 
-@media (max-width: 768px) {
-  .collapsible-filters-toggle {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 14px;
-    margin-bottom: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: #fff;
-    color: #333;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .collapsible-filters-toggle-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #4CAF50;
-  }
-
-  .collapsible-filters.is-collapsed .collapsible-filters-body {
-    display: none;
-  }
-
-  .collapsible-filters.is-open .collapsible-filters-body {
-    display: block;
-  }
-
-  .collapsible-filters .filter-panel-header h3 {
-    display: none;
-  }
-
-  .collapsible-filters .filter-panel {
-    margin-bottom: 0;
-  }
+.collapsible-filters .filter-panel {
+  margin-bottom: 0;
 }

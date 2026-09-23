@@ -126,8 +126,10 @@ export const shopsApi = {
 
 export const usersApi = {
   getAll: () => apiCall('/users'),
+  getOne: (id) => apiCall(`/users/${id}`),
   getTenants: () => apiCall('/users/tenants'),
   create: (data) => apiCall('/users', { method: 'POST', body: data }),
+  update: (id, data) => apiCall(`/users/${id}`, { method: 'PATCH', body: data }),
   assignShops: (id, shopIds) => apiCall(`/users/${id}/shops`, { method: 'PATCH', body: { shopIds } }),
   assignRole: (id, role) => apiCall(`/users/${id}/role`, { method: 'PATCH', body: { role } }),
   resetPassword: (id, password) => apiCall(`/users/${id}/password`, { method: 'PATCH', body: { password } }),
