@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { userPermissionsApi } from '../services/api';
+import { mergeModuleCatalog } from '../services/appModules';
 import { getUser, updateStoredUser } from '../services/session';
 import './PermissionsModal.css';
 
@@ -20,7 +21,7 @@ export const PermissionsIconButton = ({ onClick, label = 'Manage permissions', c
 );
 
 const PermissionsModal = ({ user, catalog: catalogProp, onClose, onSaved }) => {
-  const [catalog, setCatalog] = useState(catalogProp || []);
+  const [catalog, setCatalog] = useState(mergeModuleCatalog(catalogProp || []));
   const [selected, setSelected] = useState([...(user.permissions || [])]);
   const [original, setOriginal] = useState([...(user.permissions || [])]);
   const [loading, setLoading] = useState(!catalogProp || !user.permissions);
@@ -55,7 +56,7 @@ const PermissionsModal = ({ user, catalog: catalogProp, onClose, onSaved }) => {
         if (cancelled) {
           return;
         }
-        const modules = result.modules || catalogProp || [];
+        const modules = mergeModuleCatalog(result.modules || catalogProp || []);
         const match = (result.users || []).find((row) => String(row.id) === String(user.id));
         const modulesForUser = match?.permissions || user.permissions || [];
         setCatalog(modules);

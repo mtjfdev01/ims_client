@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import FilterActions from '../../components/FilterActions';
 import '../../components/FilterPanel.css';
 import { PAYMENT_LABELS } from './salePayment';
+import CatalogFilterFields from '../../components/CatalogFilterFields';
+import { ITEM_CONDITIONS } from '../items/itemCondition';
 
 const emptyFilters = {
   date: '',
@@ -10,6 +12,9 @@ const emptyFilters = {
   search: '',
   paymentStatus: '',
   dueToday: '',
+  condition: '',
+  companyId: '',
+  categoryId: '',
 };
 
 const SaleFilterPanel = ({ onFilterChange, onClear, currentFilters = {} }) => {
@@ -24,6 +29,9 @@ const SaleFilterPanel = ({ onFilterChange, onClear, currentFilters = {} }) => {
     currentFilters.search,
     currentFilters.paymentStatus,
     currentFilters.dueToday,
+    currentFilters.condition,
+    currentFilters.companyId,
+    currentFilters.categoryId,
   ]);
 
   const handleChange = (e) => {
@@ -92,9 +100,26 @@ const SaleFilterPanel = ({ onFilterChange, onClear, currentFilters = {} }) => {
               name="search"
               value={filters.search}
               onChange={handleChange}
-              placeholder="Name or phone"
+              placeholder="Customer, item, or unique ID"
               className="filter-input"
             />
+          </div>
+          <CatalogFilterFields filters={filters} onChange={handleChange} />
+          <div className="filter-field">
+            <label htmlFor="condition">Condition:</label>
+            <select
+              id="condition"
+              name="condition"
+              value={filters.condition}
+              onChange={handleChange}
+              className="filter-input"
+            >
+              <option value="">All items</option>
+              <option value="second_hand">Second-hand only</option>
+              {ITEM_CONDITIONS.map((entry) => (
+                <option key={entry.value} value={entry.value}>{entry.label}</option>
+              ))}
+            </select>
           </div>
           <div className="filter-field">
             <label htmlFor="date">Single Date:</label>

@@ -1,31 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
+import { CustomerSearchSelect } from '../../components/entitySearchSelects';
+import CollapseBody from '../../components/CollapseBody';
+import InlineCreatePanel from '../../components/InlineCreatePanel';
 import { FREQUENCY_LABELS, money, moneyText, resolvePaidAmount } from './salePayment';
 
 const SalePaymentFields = ({
   totalAmount,
-  customers = [],
   value,
   onChange,
   allowNewCustomer = true,
 }) => {
+  const [open, setOpen] = useState(false);
   const update = (field, fieldValue) => onChange({ ...value, [field]: fieldValue });
   const paid = resolvePaidAmount(value, totalAmount);
   const remaining = Math.max(0, money(totalAmount) - paid);
   const isCredit = remaining > 0.001;
   const hasPlan = value.installmentFrequency && value.installmentFrequency !== 'none';
-  const customerOptions = [
-    { value: '', label: 'Walk-in / no customer' },
-    ...customers.map((customer) => ({
-      value: customer.id,
-      label: customer.phone ? `${customer.name} (${customer.phone})` : customer.name,
-    })),
-  ];
 
   return (
-    <div className="sale-payment-section">
-      <h3>Customer & Payment</h3>
+    <div className={`sale-payment-section${open ? ' is-open' : ' is-collapsed'}`}>
+      <button
+        type="button"
+        className="sale-payment-toggle"
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+      >
+        <span>Customer & Payment</span>
+        <span className="sale-payment-toggle-label">{open ? 'Hide' : 'Show'}</span>
+      </button>
+      <CollapseBody open={open} className="sale-payment-body">
       <p className="sale-payment-hint">
         Leave customer empty for a cash walk-in. Amount paid defaults to the sale total.
         Use a lower amount only when the customer is borrowing or paying later.
@@ -33,38 +38,40 @@ const SalePaymentFields = ({
 
       <div className="form-fields-row">
         <FormField label="Customer" htmlFor="customerId">
-          <Input
-            type="dropdown"
+          <CustomerSearchSelect
+            id="customerId"
             name="customerId"
             placeholder="Walk-in / no customer"
             value={value.customerId}
+            selectedLabel={value.customerLabel}
             onChange={(e) => update('customerId', e.target.value)}
-            options={customerOptions}
           />
         </FormField>
       </div>
 
       {allowNewCustomer && !value.customerId && (
-        <div className="form-fields-row">
-          <FormField label="Or add customer name" htmlFor="newCustomerName">
-            <Input
-              type="text"
-              name="newCustomerName"
-              placeholder="Optional new customer"
-              value={value.newCustomerName}
-              onChange={(e) => update('newCustomerName', e.target.value)}
-            />
-          </FormField>
-          <FormField label="Phone" htmlFor="newCustomerPhone">
-            <Input
-              type="text"
-              name="newCustomerPhone"
-              placeholder="Optional phone"
-              value={value.newCustomerPhone}
-              onChange={(e) => update('newCustomerPhone', e.target.value)}
-            />
-          </FormField>
-        </div>
+        <InlineCreatePanel title="Add new customer">
+          <div className="form-fields-row">
+            <FormField label="Customer name" htmlFor="newCustomerName">
+              <Input
+                type="text"
+                name="newCustomerName"
+                placeholder="Optional new customer"
+                value={value.newCustomerName}
+                onChange={(e) => update('newCustomerName', e.target.value)}
+              />
+            </FormField>
+            <FormField label="Phone" htmlFor="newCustomerPhone">
+              <Input
+                type="text"
+                name="newCustomerPhone"
+                placeholder="Optional phone"
+                value={value.newCustomerPhone}
+                onChange={(e) => update('newCustomerPhone', e.target.value)}
+              />
+            </FormField>
+          </div>
+        </InlineCreatePanel>
       )}
 
       <div className="form-fields-row">
@@ -76,7 +83,7 @@ const SalePaymentFields = ({
             value={value.amountPaid}
             onChange={(e) => update('amountPaid', e.target.value)}
             min="0"
-            step="0.01"
+            step="any"
           />
         </FormField>
         <FormField label="Remaining" htmlFor="remaining">
@@ -123,13 +130,14 @@ const SalePaymentFields = ({
                   value={value.installmentAmount}
                   onChange={(e) => update('installmentAmount', e.target.value)}
                   min="0.01"
-                  step="0.01"
+                  step="any"
                 />
               </FormField>
             </div>
           )}
         </>
       )}
+      </CollapseBody>
     </div>
   );
 };

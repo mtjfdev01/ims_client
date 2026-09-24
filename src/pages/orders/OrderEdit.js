@@ -5,6 +5,10 @@ import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import { ordersApi, itemsApi } from '../../services/api';
+import { formatAmount } from '../../utils/formatAmount';
+import { ItemSearchSelect } from '../../components/entitySearchSelects';
+import { itemNameLabel, itemOptionLabel } from '../items/itemCondition';
+import '../../components/ItemInfoBox.css';
 import './OrderCreate.css';
 
 const OrderEdit = () => {
@@ -14,12 +18,11 @@ const OrderEdit = () => {
     {
       itemId: '',
       quantity: 1,
-      amount: 0,
+      amount: '',
       selectedItem: null
     }
   ]);
   const [status, setStatus] = useState('pending');
-  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [returnItems, setReturnItems] = useState({});
@@ -27,7 +30,6 @@ const OrderEdit = () => {
 
   useEffect(() => {
     loadData();
-    loadItems();
   }, [id]);
 
   const loadData = async () => {
@@ -39,7 +41,7 @@ const OrderEdit = () => {
         const mappedItems = data.orderItems.map(orderItem => ({
           itemId: orderItem.item?.id || orderItem.itemId || '',
           quantity: orderItem.quantity || 1,
-          amount: typeof orderItem.amount === 'string' ? parseFloat(orderItem.amount) || 0 : (orderItem.amount || 0),
+          amount: orderItem.amount == null || orderItem.amount === '' ? '' : orderItem.amount,
           selectedItem: orderItem.item || null
         }));
         setOrderItems(mappedItems);
@@ -61,16 +63,6 @@ const OrderEdit = () => {
       console.error('Error loading order:', error);
     } finally {
       setLoadingData(false);
-    }
-  };
-
-  const loadItems = async () => {
-    try {
-      const data = await itemsApi.getAll();
-      const itemsArray = Array.isArray(data) ? data : (data.data || []);
-      setItems(itemsArray);
-    } catch (error) {
-      console.error('Error loading items:', error);
     }
   };
 
@@ -96,18 +88,16 @@ const OrderEdit = () => {
 
   const calculateAmount = (quantity, purchasePrice) => {
     if (!quantity || !purchasePrice) return 0;
-    return parseFloat((quantity * purchasePrice).toFixed(2));
+    return Number(formatAmount(quantity * purchasePrice));
   };
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...orderItems];
-    updatedItems[index][field] = field === 'quantity' || field === 'amount' 
-      ? (parseFloat(value) || 0) 
-      : value;
+    updatedItems[index][field] = value;
 
     if (field === 'itemId') {
       updatedItems[index].selectedItem = null;
-      updatedItems[index].amount = 0;
+      updatedItems[index].amount = '';
       setOrderItems(updatedItems);
       if (value) {
         loadItemDetails(value, index);
@@ -130,7 +120,7 @@ const OrderEdit = () => {
   const handleReturnQuantity = (itemId, value) => {
     setReturnItems(prev => ({
       ...prev,
-      [itemId]: parseFloat(value) || 0
+      [itemId]: value
     }));
   };
 
@@ -168,7 +158,6 @@ const OrderEdit = () => {
       
       // Reload order data to sync quantities and get updated returnedQuantity
       await loadData();
-      await loadItems();
     } catch (error) {
       console.error('Error processing return items:', error);
       throw error; // Re-throw to be handled by handleSubmit
@@ -183,7 +172,7 @@ const OrderEdit = () => {
       {
         itemId: '',
         quantity: 1,
-        amount: 0,
+        amount: '',
         selectedItem: null
       }
     ]);
@@ -265,11 +254,6 @@ const OrderEdit = () => {
     );
   }
 
-  const itemOptions = items.map(item => ({ 
-    value: item.id, 
-    label: item.name ? `${item.name} (ID: ${item.id}, Qty: ${item.quantity})` : `Item #${item.id} (Qty: ${item.quantity})` 
-  }));
-
   const statusOptions = [
     { value: 'pending', label: 'Pending' },
     { value: 'in_progress', label: 'In Progress' },
@@ -330,13 +314,14 @@ const OrderEdit = () => {
 
                 <div className="form-fields-row">
                   <FormField label="Item" htmlFor={`item-${index}`} required>
-                    <Input
-                      type="dropdown"
+                    <ItemSearchSelect
+                      id={`item-${index}`}
                       name="itemId"
-                      placeholder="Select Item"
+                      shopOnly
+                      placeholder="Search item"
                       value={orderItem.itemId}
+                      selectedLabel={orderItem.selectedItem ? itemNameLabel(orderItem.selectedItem) : undefined}
                       onChange={(e) => handleItemChange(index, 'itemId', e.target.value)}
-                      options={itemOptions}
                     />
                   </FormField>
                   <FormField label="Quantity" htmlFor={`quantity-${index}`} required>
@@ -354,11 +339,11 @@ const OrderEdit = () => {
 
                 {orderItem.selectedItem && (
                   <div className="item-info-box">
-                    <div><strong>Item:</strong> {orderItem.selectedItem.name || `Item #${orderItem.selectedItem.id}`}</div>
-                    <div><strong>Available Quantity:</strong> {orderItem.selectedItem.quantity}</div>
-                    <div><strong>Issued Quantity:</strong> {issuedQty}</div>
-                    <div><strong>Returned Quantity:</strong> {returnedQty}</div>
-                    <div><strong>Net Quantity (Issued - Returned):</strong> {netQty}</div>
+                    <span className="item-info-stat"><strong>Item</strong> {itemOptionLabel(orderItem.selectedItem)}</span>
+                    <span className="item-info-stat"><strong>Available</strong> {orderItem.selectedItem.quantity}</span>
+                    <span className="item-info-stat"><strong>Issued</strong> {issuedQty}</span>
+                    <span className="item-info-stat"><strong>Returned</strong> {returnedQty}</span>
+                    <span className="item-info-stat"><strong>Net</strong> {netQty}</span>
                   </div>
                 )}
 
@@ -387,7 +372,7 @@ const OrderEdit = () => {
                       placeholder="Amount (Auto-calculated)"
                       value={orderItem.amount}
                       onChange={(e) => handleItemChange(index, 'amount', e.target.value)}
-                      step="0.01"
+                      step="any"
                       min="0"
                       disabled={true}
                     />
@@ -400,7 +385,7 @@ const OrderEdit = () => {
 
         <div className="order-totals">
           <div className="total-row">
-            <strong>Total Amount:</strong> {totalAmount.toFixed(2)}
+            <strong>Total Amount:</strong> {formatAmount(totalAmount)}
           </div>
         </div>
 

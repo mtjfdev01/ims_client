@@ -1,39 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../../components/Navigation';
 import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
-import { purchasesApi, itemsApi } from '../../services/api';
+import { purchasesApi } from '../../services/api';
+import { ItemSearchSelect, SellerSearchSelect } from '../../components/entitySearchSelects';
+import InlineCreatePanel from '../../components/InlineCreatePanel';
 import RequireShop from '../../components/RequireShop';
+import { hasPermission } from '../../services/session';
 
 const PurchaseCreate = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     itemId: '',
-    purchasePrice: 0,
+    purchasePrice: '',
     quantity: 1,
-    purchaseDate: new Date().toISOString().split('T')[0]
+    purchaseDate: new Date().toISOString().split('T')[0],
+    sellerId: '',
+    newSellerName: '',
+    newSellerPhone: '',
+    newSellerCnic: '',
   });
-  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    loadItems();
-  }, []);
-
-  const loadItems = async () => {
-    try {
-      const data = await itemsApi.getAll();
-      const itemsArray = Array.isArray(data) ? data : (data.data || []);
-      setItems(itemsArray);
-    } catch (error) {
-      console.error('Error loading items:', error);
-    }
-  };
+  const canUseSellers = hasPermission('sellers');
 
   const handleChange = (e) => {
-    const value = e.target.type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value;
+    const value = e.target.value;
     setFormData({
       ...formData,
       [e.target.name]: value
@@ -61,12 +54,22 @@ const PurchaseCreate = () => {
 
     setLoading(true);
     try {
-      await purchasesApi.create({
+      const payload = {
         itemId: parseInt(formData.itemId),
         purchasePrice: formData.purchasePrice,
         quantity: formData.quantity || 1,
-        purchaseDate: formData.purchaseDate
-      });
+        purchaseDate: formData.purchaseDate,
+      };
+      if (formData.sellerId) {
+        payload.sellerId = parseInt(formData.sellerId);
+      } else if (formData.newSellerName.trim()) {
+        payload.newSeller = {
+          name: formData.newSellerName.trim(),
+          phone: formData.newSellerPhone.trim() || undefined,
+          cnic: formData.newSellerCnic.trim() || undefined,
+        };
+      }
+      await purchasesApi.create(payload);
       navigate('/purchases');
     } catch (error) {
       console.error('Error creating purchase:', error);
@@ -75,11 +78,6 @@ const PurchaseCreate = () => {
     }
   };
 
-  const itemOptions = items.map(item => ({
-    value: item.id,
-    label: item.name ? `${item.name} (ID: ${item.id})` : `Item #${item.id}`
-  }));
-
   return (
     <div>
       <Navigation />
@@ -87,26 +85,28 @@ const PurchaseCreate = () => {
       <FormWrapper title="Create Purchase" onSubmit={handleSubmit}>
         <div className="form-fields-row">
           <FormField label="Item" htmlFor="itemId" required>
-            <Input
-              type="dropdown"
+            <ItemSearchSelect
+              id="itemId"
               name="itemId"
-              placeholder="Select Item"
+              shopOnly
+              placeholder="Search item"
               value={formData.itemId}
               onChange={handleChange}
-              options={itemOptions}
             />
           </FormField>
-          <FormField label="Purchase Price (per unit)" htmlFor="purchasePrice" required>
+          <FormField label="Price per unit" htmlFor="purchasePrice" required>
             <Input
               type="number"
               name="purchasePrice"
               placeholder="Purchase Price (per unit)"
               value={formData.purchasePrice}
               onChange={handleChange}
-              step="0.01"
+              step="any"
               min="0"
             />
           </FormField>
+        </div>
+        <div className="form-fields-row">
           <FormField label="Quantity" htmlFor="quantity" required>
             <Input
               type="number"
@@ -117,8 +117,6 @@ const PurchaseCreate = () => {
               min="1"
             />
           </FormField>
-        </div>
-        <div className="form-fields-row">
           <FormField label="Purchase Date" htmlFor="purchaseDate" required>
             <Input
               type="date"
@@ -128,6 +126,54 @@ const PurchaseCreate = () => {
             />
           </FormField>
         </div>
+        {canUseSellers && (
+          <div className="form-fields-row">
+            <FormField label="Seller" htmlFor="sellerId">
+              <SellerSearchSelect
+                id="sellerId"
+                name="sellerId"
+                placeholder="Search seller"
+                value={formData.sellerId}
+                onChange={handleChange}
+              />
+            </FormField>
+          </div>
+        )}
+        {canUseSellers && !formData.sellerId && (
+          <InlineCreatePanel title="Add new seller">
+            <div className="form-fields-row">
+              <FormField label="Seller name" htmlFor="newSellerName">
+                <Input
+                  type="text"
+                  name="newSellerName"
+                  placeholder="Optional new seller"
+                  value={formData.newSellerName}
+                  onChange={handleChange}
+                />
+              </FormField>
+              <FormField label="Phone" htmlFor="newSellerPhone">
+                <Input
+                  type="text"
+                  name="newSellerPhone"
+                  placeholder="Optional phone"
+                  value={formData.newSellerPhone}
+                  onChange={handleChange}
+                />
+              </FormField>
+            </div>
+            <div className="form-fields-row">
+              <FormField label="CNIC" htmlFor="newSellerCnic">
+                <Input
+                  type="text"
+                  name="newSellerCnic"
+                  placeholder="Optional CNIC"
+                  value={formData.newSellerCnic}
+                  onChange={handleChange}
+                />
+              </FormField>
+            </div>
+          </InlineCreatePanel>
+        )}
         <div className="form-actions">
           <button type="button" onClick={() => navigate('/purchases')} className="form-button form-button-secondary">
             Cancel

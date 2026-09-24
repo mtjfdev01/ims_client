@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import SingleView from '../../components/SingleView';
 import { shopsApi } from '../../services/api';
 import { hasPermission } from '../../services/session';
+import { formatAmount } from '../../utils/formatAmount';
 
 const ShopView = () => {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ const ShopView = () => {
       label: 'Asset Value',
       accessor: 'assetValue',
       render: () => assetValue !== null 
-        ? `${assetValue.toFixed(2)}` 
+        ? formatAmount(assetValue) 
         : 'Loading...'
     },
   ];

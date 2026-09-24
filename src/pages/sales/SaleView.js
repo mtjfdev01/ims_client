@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navigation from '../../components/Navigation';
+import Input from '../../components/Input';
 import PermissionLink from '../../components/PermissionLink';
 import { salesApi } from '../../services/api';
 import { FREQUENCY_LABELS, money, moneyText, paymentLabel, todayIso } from './salePayment';
+import { itemOptionLabel } from '../items/itemCondition';
 import { hasPermission } from '../../services/session';
 import '../../components/SingleView.css';
 import './SaleView.css';
@@ -206,9 +208,7 @@ const SaleView = () => {
                       {sale.saleItems.map((saleItem, index) => (
                         <tr key={index}>
                           <td>
-                            {saleItem.item?.name
-                              ? `${saleItem.item.name} (ID: ${saleItem.item.id})`
-                              : `Item #${saleItem.item?.id || saleItem.itemId || 'N/A'}`}
+                            {itemOptionLabel(saleItem.item)}
                           </td>
                           <td>{saleItem.quantity || 0}</td>
                           <td>{moneyText(saleItem.amount)}</td>
@@ -258,10 +258,11 @@ const SaleView = () => {
             <div className="form-fields-row">
               <label>
                 Amount
-                <input
+                <Input
                   type="number"
-                  min="0.01"
-                  step="0.01"
+                  name="amount"
+                  min="0"
+                  step="any"
                   max={remaining}
                   value={paymentForm.amount}
                   onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}

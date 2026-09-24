@@ -56,7 +56,7 @@ const ShopEdit = () => {
         storeIds: selectedOptions
       });
     } else {
-      const value = e.target.type === 'number' ? parseFloat(e.target.value) : e.target.value;
+      const value = e.target.value;
       setFormData({
         ...formData,
         [e.target.name]: value

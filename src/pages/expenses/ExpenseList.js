@@ -1,6 +1,7 @@
 import React from 'react';
 import Listing from '../../components/Listing';
 import { expensesApi } from '../../services/api';
+import { formatAmount } from '../../utils/formatAmount';
 
 const ExpenseList = () => {
   const columns = [
@@ -11,9 +12,7 @@ const ExpenseList = () => {
     { 
       header: 'Price', 
       accessor: 'price',
-      render: (value) => typeof value === 'string' 
-        ? `${parseFloat(value).toFixed(2)}` 
-        : `${value?.toFixed(2) || '0.00'}`
+      render: (value) => formatAmount(value)
     },
   ];
 

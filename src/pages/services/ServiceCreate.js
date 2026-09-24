@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../../components/Navigation';
 import FormWrapper from '../../components/FormWrapper';
@@ -6,7 +6,8 @@ import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import RequireShop from '../../components/RequireShop';
 import SalePaymentFields from '../sales/SalePaymentFields';
-import { customersApi, servicesApi, unwrapList } from '../../services/api';
+import { servicesApi } from '../../services/api';
+import { formatAmount } from '../../utils/formatAmount';
 import {
   buildSalePaymentPayload,
   emptyPaymentForm,
@@ -22,15 +23,8 @@ const ServiceCreate = () => {
     notes: '',
     amount: '',
   });
-  const [customers, setCustomers] = useState([]);
   const [payment, setPayment] = useState(emptyPaymentForm());
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    customersApi.getAll()
-      .then((data) => setCustomers(unwrapList(data)))
-      .catch(() => setCustomers([]));
-  }, []);
 
   const amount = Number(formData.amount || 0);
 
@@ -108,11 +102,11 @@ const ServiceCreate = () => {
                 value={formData.amount}
                 onChange={handleChange}
                 min="0.01"
-                step="0.01"
+                step="any"
               />
             </FormField>
             <FormField label="Profit" htmlFor="profit">
-              <Input type="text" name="profit" value={amount.toFixed(2)} disabled />
+              <Input type="text" name="profit" value={formatAmount(amount)} disabled />
             </FormField>
           </div>
           <FormField label="Notes" htmlFor="notes">
@@ -126,7 +120,6 @@ const ServiceCreate = () => {
           </FormField>
           <SalePaymentFields
             totalAmount={amount}
-            customers={customers}
             value={payment}
             onChange={setPayment}
           />

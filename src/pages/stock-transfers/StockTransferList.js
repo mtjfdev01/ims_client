@@ -3,6 +3,7 @@ import Listing from '../../components/Listing';
 import SearchFilterPanel from '../../components/SearchFilterPanel';
 import { issuesApi } from '../../services/api';
 import { formatTransferDate, locationLabel } from './locationLabel';
+import { itemOptionLabel } from '../items/itemCondition';
 
 const fetchTransfers = async (page, limit, filters) => {
   const rows = await issuesApi.getAll();
@@ -28,7 +29,7 @@ const StockTransferList = () => {
     {
       header: 'Item',
       accessor: 'item',
-      render: (value) => value?.name ? `${value.name} (ID: ${value.id})` : `Item #${value?.id || '—'}`,
+      render: (value) => itemOptionLabel(value),
     },
     {
       header: 'From',

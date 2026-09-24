@@ -1,6 +1,8 @@
 import React from 'react';
 import Listing from '../../components/Listing';
 import { purchasesApi } from '../../services/api';
+import { formatAmount } from '../../utils/formatAmount';
+import { itemOptionLabel } from '../items/itemCondition';
 import PurchaseFilterPanel from './PurchaseFilterPanel';
 
 const PurchaseList = () => {
@@ -8,14 +10,15 @@ const PurchaseList = () => {
     { 
       header: 'Item', 
       accessor: 'item',
-      render: (value) => value?.name ? `${value.name} (ID: ${value.id})` : `Item #${value?.id || 'N/A'}`
+      render: (value) => {
+        if (!value) return 'N/A';
+        return itemOptionLabel(value);
+      }
     },
     { 
       header: 'Purchase Price (per unit)', 
       accessor: 'purchasePrice',
-      render: (value) => typeof value === 'string' 
-        ? `${parseFloat(value).toFixed(2)}` 
-        : `${value?.toFixed(2) || '0.00'}`
+      render: (value) => formatAmount(value)
     },
     { 
       header: 'Quantity', 
@@ -30,7 +33,7 @@ const PurchaseList = () => {
           ? parseFloat(row.purchasePrice) 
           : (row.purchasePrice || 0);
         const qty = row.quantity || 1;
-        return `${(price * qty).toFixed(2)}`;
+        return formatAmount(price * qty);
       }
     },
     { 
@@ -41,6 +44,11 @@ const PurchaseList = () => {
         const date = new Date(value);
         return date.toLocaleDateString();
       }
+    },
+    {
+      header: 'Seller',
+      accessor: 'seller',
+      render: (value) => value?.name || '—',
     },
     { 
       header: 'Created At', 

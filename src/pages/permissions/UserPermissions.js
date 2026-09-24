@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Navigation from '../../components/Navigation';
 import PermissionsModal, { PermissionsIconButton } from '../../components/PermissionsModal';
 import { userPermissionsApi, usersApi } from '../../services/api';
+import { mergeModuleCatalog } from '../../services/appModules';
 import { getViewTenantId, isSuperAdmin } from '../../services/session';
 import '../admin/AdminUsers.css';
 import './UserPermissions.css';
@@ -21,7 +22,7 @@ const UserPermissions = () => {
     setError('');
     try {
       const result = await userPermissionsApi.list(nextTenantId || undefined);
-      setCatalog(result.modules || []);
+      setCatalog(mergeModuleCatalog(result.modules || []));
       setUsers(result.users || []);
     } catch (err) {
       setError(err.message || 'Failed to load permissions');

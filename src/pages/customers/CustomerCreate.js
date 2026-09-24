@@ -10,7 +10,7 @@ import { getUser } from '../../services/session';
 
 const CustomerCreate = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', notes: '' });
+  const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', notes: '', cnic: '' });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -32,6 +32,7 @@ const CustomerCreate = () => {
         email: formData.email.trim() || undefined,
         address: formData.address.trim() || undefined,
         notes: formData.notes.trim() || undefined,
+        cnic: formData.cnic.trim() || undefined,
       });
       navigate('/customers');
     } catch (error) {
@@ -84,6 +85,18 @@ const CustomerCreate = () => {
               placeholder="Optional address"
               value={formData.address}
               onChange={handleChange}
+            />
+          </FormField>
+        </div>
+        <div className="form-fields-row">
+          <FormField label="CNIC" htmlFor="cnic">
+            <Input
+              type="text"
+              name="cnic"
+              placeholder="Optional CNIC"
+              value={formData.cnic}
+              onChange={handleChange}
+              maxLength={20}
             />
           </FormField>
         </div>

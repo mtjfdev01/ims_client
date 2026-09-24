@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { displayEditableNumber, sanitizeNumberTyping } from '../utils/formatAmount';
 import './Input.css';
 
 export const EyeIcon = ({ off }) => (
@@ -179,21 +180,50 @@ const Input = ({ type, name, id, onChange, placeholder, value, options, multiple
     );
   }
 
+  const handleNumberChange = (e) => {
+    if (!onChange) {
+      return;
+    }
+    const next = sanitizeNumberTyping(e.target.value);
+    onChange({
+      ...e,
+      target: {
+        ...e.target,
+        name,
+        type: 'number',
+        value: next,
+      },
+    });
+  };
+
+  const handleNumberFocus = (e) => {
+    if (disabled) {
+      return;
+    }
+    e.target.select();
+  };
+
   const input = (
     <input
       type={type === 'password' && showPassword ? 'text' : type}
       id={id}
       name={name}
-      onChange={onChange}
+      onChange={type === 'number' ? handleNumberChange : onChange}
+      onFocus={type === 'number' ? handleNumberFocus : undefined}
       placeholder={placeholder}
-      value={value !== undefined && value !== null ? value : ''}
+      value={
+        value !== undefined && value !== null
+          ? (type === 'number' ? displayEditableNumber(value, { allowZero: disabled }) : value)
+          : ''
+      }
       className="common-input"
       disabled={disabled}
       min={min}
       max={max}
-      step={step}
+      step={type === 'number' && step == null ? 'any' : step}
       required={required}
       minLength={minLength}
+      inputMode={type === 'number' ? 'decimal' : undefined}
     />
   );
 

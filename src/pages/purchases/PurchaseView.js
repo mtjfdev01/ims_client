@@ -2,6 +2,8 @@ import React from 'react';
 import SingleView from '../../components/SingleView';
 import PermissionLink from '../../components/PermissionLink';
 import { purchasesApi } from '../../services/api';
+import { formatAmount } from '../../utils/formatAmount';
+import { itemOptionLabel } from '../items/itemCondition';
 
 const PurchaseView = () => {
   const fields = [
@@ -9,7 +11,7 @@ const PurchaseView = () => {
       label: 'Item',
       accessor: 'item',
       render: (value) => {
-        const label = value?.name ? `${value.name} (ID: ${value.id})` : `Item #${value?.id || 'N/A'}`;
+        const label = itemOptionLabel(value);
         return value?.id
           ? <PermissionLink module="items" to={`/items/${value.id}`}>{label}</PermissionLink>
           : label;
@@ -18,9 +20,7 @@ const PurchaseView = () => {
     { 
       label: 'Purchase Price (per unit)', 
       accessor: 'purchasePrice',
-      render: (value) => typeof value === 'string' 
-        ? `${parseFloat(value).toFixed(2)}` 
-        : `${value?.toFixed(2) || '0.00'}`
+      render: (value) => formatAmount(value)
     },
     { 
       label: 'Quantity', 
@@ -35,7 +35,7 @@ const PurchaseView = () => {
           ? parseFloat(row.purchasePrice) 
           : (row.purchasePrice || 0);
         const qty = row.quantity || 1;
-        return `${(price * qty).toFixed(2)}`;
+        return formatAmount(price * qty);
       }
     },
     { 
@@ -45,6 +45,15 @@ const PurchaseView = () => {
         if (!value) return 'N/A';
         const date = new Date(value);
         return date.toLocaleDateString();
+      }
+    },
+    {
+      label: 'Seller',
+      accessor: 'seller',
+      render: (value) => {
+        if (!value?.id) return '—';
+        const label = value.phone ? `${value.name} (${value.phone})` : value.name;
+        return <PermissionLink module="sellers" to={`/sellers/${value.id}`}>{label}</PermissionLink>;
       }
     },
     { 

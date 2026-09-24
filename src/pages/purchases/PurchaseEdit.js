@@ -4,24 +4,33 @@ import Navigation from '../../components/Navigation';
 import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
-import { purchasesApi, itemsApi } from '../../services/api';
+import { purchasesApi } from '../../services/api';
+import { ItemSearchSelect, SellerSearchSelect } from '../../components/entitySearchSelects';
+import InlineCreatePanel from '../../components/InlineCreatePanel';
+import { itemNameLabel, itemOptionLabel } from '../items/itemCondition';
+import { hasPermission } from '../../services/session';
 
 const PurchaseEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [formData, setFormData] = useState({
     itemId: '',
-    purchasePrice: 0,
+    itemLabel: '',
+    purchasePrice: '',
     quantity: 1,
-    purchaseDate: new Date().toISOString().split('T')[0]
+    purchaseDate: new Date().toISOString().split('T')[0],
+    sellerId: '',
+    sellerLabel: '',
+    newSellerName: '',
+    newSellerPhone: '',
+    newSellerCnic: '',
   });
-  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const canUseSellers = hasPermission('sellers');
 
   useEffect(() => {
     loadData();
-    loadItems();
   }, [id]);
 
   const loadData = async () => {
@@ -30,9 +39,19 @@ const PurchaseEdit = () => {
       const data = await purchasesApi.getOne(id);
       setFormData({
         itemId: data.item?.id || data.itemId || '',
-        purchasePrice: data.purchasePrice || 0,
+        itemLabel: data.item ? itemNameLabel(data.item) : '',
+        purchasePrice: data.purchasePrice == null || data.purchasePrice === '' ? '' : data.purchasePrice,
         quantity: data.quantity || 1,
-        purchaseDate: data.purchaseDate ? new Date(data.purchaseDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+        purchaseDate: data.purchaseDate ? new Date(data.purchaseDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        sellerId: data.seller?.id || data.sellerId || '',
+        sellerLabel: data.seller
+          ? [data.seller.phone, data.seller.cnic].filter(Boolean).length
+            ? `${data.seller.name} (${[data.seller.phone, data.seller.cnic].filter(Boolean).join(' · ')})`
+            : data.seller.name
+          : '',
+        newSellerName: '',
+        newSellerPhone: '',
+        newSellerCnic: '',
       });
     } catch (error) {
       console.error('Error loading purchase:', error);
@@ -41,18 +60,8 @@ const PurchaseEdit = () => {
     }
   };
 
-  const loadItems = async () => {
-    try {
-      const data = await itemsApi.getAll();
-      const itemsArray = Array.isArray(data) ? data : (data.data || []);
-      setItems(itemsArray);
-    } catch (error) {
-      console.error('Error loading items:', error);
-    }
-  };
-
   const handleChange = (e) => {
-    const value = e.target.type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value;
+    const value = e.target.value;
     setFormData({
       ...formData,
       [e.target.name]: value
@@ -80,12 +89,22 @@ const PurchaseEdit = () => {
 
     setLoading(true);
     try {
-      await purchasesApi.update(id, {
+      const payload = {
         itemId: parseInt(formData.itemId),
         purchasePrice: formData.purchasePrice,
         quantity: formData.quantity || 1,
-        purchaseDate: formData.purchaseDate
-      });
+        purchaseDate: formData.purchaseDate,
+        sellerId: formData.sellerId ? parseInt(formData.sellerId) : null,
+      };
+      if (!formData.sellerId && formData.newSellerName.trim()) {
+        delete payload.sellerId;
+        payload.newSeller = {
+          name: formData.newSellerName.trim(),
+          phone: formData.newSellerPhone.trim() || undefined,
+          cnic: formData.newSellerCnic.trim() || undefined,
+        };
+      }
+      await purchasesApi.update(id, payload);
       navigate('/purchases');
     } catch (error) {
       console.error('Error updating purchase:', error);
@@ -105,24 +124,20 @@ const PurchaseEdit = () => {
     );
   }
 
-  const itemOptions = items.map(item => ({
-    value: item.id,
-    label: item.name ? `${item.name} (ID: ${item.id})` : `Item #${item.id}`
-  }));
-
   return (
     <div>
       <Navigation />
       <FormWrapper title="Edit Purchase" onSubmit={handleSubmit}>
         <div className="form-fields-row">
           <FormField label="Item" htmlFor="itemId" required>
-            <Input
-              type="dropdown"
+            <ItemSearchSelect
+              id="itemId"
               name="itemId"
-              placeholder="Select Item"
+              shopOnly
+              placeholder="Search item"
               value={formData.itemId}
+              selectedLabel={formData.itemLabel}
               onChange={handleChange}
-              options={itemOptions}
             />
           </FormField>
           <FormField label="Purchase Price (per unit)" htmlFor="purchasePrice" required>
@@ -132,10 +147,12 @@ const PurchaseEdit = () => {
               placeholder="Purchase Price (per unit)"
               value={formData.purchasePrice}
               onChange={handleChange}
-              step="0.01"
+              step="any"
               min="0"
             />
           </FormField>
+        </div>
+        <div className="form-fields-row">
           <FormField label="Quantity" htmlFor="quantity" required>
             <Input
               type="number"
@@ -146,8 +163,6 @@ const PurchaseEdit = () => {
               min="1"
             />
           </FormField>
-        </div>
-        <div className="form-fields-row">
           <FormField label="Purchase Date" htmlFor="purchaseDate" required>
             <Input
               type="date"
@@ -157,6 +172,55 @@ const PurchaseEdit = () => {
             />
           </FormField>
         </div>
+        {canUseSellers && (
+          <div className="form-fields-row">
+            <FormField label="Seller" htmlFor="sellerId">
+              <SellerSearchSelect
+                id="sellerId"
+                name="sellerId"
+                placeholder="Search seller"
+                value={formData.sellerId}
+                selectedLabel={formData.sellerLabel}
+                onChange={handleChange}
+              />
+            </FormField>
+          </div>
+        )}
+        {canUseSellers && !formData.sellerId && (
+          <InlineCreatePanel title="Add new seller">
+            <div className="form-fields-row">
+              <FormField label="Seller name" htmlFor="newSellerName">
+                <Input
+                  type="text"
+                  name="newSellerName"
+                  placeholder="Optional new seller"
+                  value={formData.newSellerName}
+                  onChange={handleChange}
+                />
+              </FormField>
+              <FormField label="Phone" htmlFor="newSellerPhone">
+                <Input
+                  type="text"
+                  name="newSellerPhone"
+                  placeholder="Optional phone"
+                  value={formData.newSellerPhone}
+                  onChange={handleChange}
+                />
+              </FormField>
+            </div>
+            <div className="form-fields-row">
+              <FormField label="CNIC" htmlFor="newSellerCnic">
+                <Input
+                  type="text"
+                  name="newSellerCnic"
+                  placeholder="Optional CNIC"
+                  value={formData.newSellerCnic}
+                  onChange={handleChange}
+                />
+              </FormField>
+            </div>
+          </InlineCreatePanel>
+        )}
         <div className="form-actions">
           <button type="button" onClick={() => navigate('/purchases')} className="form-button form-button-secondary">
             Cancel

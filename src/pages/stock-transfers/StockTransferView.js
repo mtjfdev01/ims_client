@@ -2,6 +2,7 @@ import React from 'react';
 import SingleView from '../../components/SingleView';
 import { issuesApi } from '../../services/api';
 import { formatTransferDate, locationLabel } from './locationLabel';
+import { itemOptionLabel } from '../items/itemCondition';
 
 const StockTransferView = () => {
   const loadTransfer = async (id) => {
@@ -16,7 +17,7 @@ const StockTransferView = () => {
     {
       label: 'Item',
       accessor: 'item',
-      render: (value) => value?.name ? `${value.name} (ID: ${value.id})` : `Item #${value?.id || '—'}`,
+      render: (value) => itemOptionLabel(value),
     },
     {
       label: 'From',

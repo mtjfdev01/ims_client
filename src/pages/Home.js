@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Navigation from '../components/Navigation';
 import { expensesApi, installmentsApi, purchasesApi, salesApi, servicesApi, shopsApi, unwrapList } from '../services/api';
 import { hasPermission } from '../services/session';
+import { formatAmount } from '../utils/formatAmount';
 import './installments/Installments.css';
 import { useShop } from '../contexts/ShopContext';
 import CollapsibleFilters from '../components/CollapsibleFilters';
@@ -14,7 +15,7 @@ const emptyFilters = {
   dateTo: '',
 };
 
-const money = (value) => Number(value || 0).toFixed(2);
+const money = (value) => formatAmount(value);
 
 const Home = () => {
   const { selectedShop } = useShop();

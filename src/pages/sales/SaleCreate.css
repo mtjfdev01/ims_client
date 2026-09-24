@@ -1,13 +1,51 @@
+.sale-create-page .selected-shop-banner {
+  padding: 8px 16px;
+  margin-bottom: 8px;
+}
+
+.sale-create-page .form-wrapper-container {
+  padding: 8px 16px 16px;
+}
+
+.sale-create-page .form-wrapper-box {
+  padding: 16px 20px;
+}
+
+.sale-create-page .form-wrapper-title {
+  margin: 0 0 8px;
+}
+
+.sale-create-page .form-wrapper-form {
+  gap: 8px;
+}
+
+.sale-create-page .form-fields-row {
+  gap: 8px 7%;
+}
+
+.sale-create-page .form-field {
+  margin-bottom: 0;
+}
+
+.sale-create-page .common-input,
+.sale-create-page .dropdown-container {
+  margin: 0;
+}
+
+.sale-create-page .form-actions {
+  margin-top: 4px;
+}
+
 .sale-items-container {
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .sale-items-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
   border-bottom: 2px solid #e0e0e0;
 }
 
@@ -35,16 +73,16 @@
   background: #f9f9f9;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
 }
 
 .sale-item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
   border-bottom: 1px solid #ddd;
 }
 
@@ -68,33 +106,25 @@
   background-color: #da190b;
 }
 
-.item-info-box {
-  background: #e3f2fd;
-  border-left: 4px solid #2196F3;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.item-info-box div {
-  margin: 5px 0;
-}
-
 .sale-totals {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   background: #fff3cd;
   border: 2px solid #ffc107;
   border-radius: 8px;
-  padding: 15px;
-  margin: 20px 0;
+  padding: 6px 12px;
+  margin: 4px 0;
 }
 
 .total-row {
   display: flex;
-  justify-content: space-between;
-  font-size: 16px;
-  margin: 8px 0;
-  padding: 5px 0;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0;
+  padding: 0;
 }
 
 .total-row strong {
@@ -105,13 +135,36 @@
   background: #f4f8ff;
   border: 1px solid #c5d8f5;
   border-radius: 8px;
-  padding: 16px;
-  margin: 20px 0;
+  padding: 8px 12px;
+  margin: 4px 0;
 }
 
-.sale-payment-section h3 {
-  margin: 0 0 8px;
+.sale-payment-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: none;
+  background: transparent;
   color: #333;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sale-payment-toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4CAF50;
+}
+
+.sale-payment-body {
+  margin-top: 0;
+}
+
+.sale-payment-body.is-open {
+  margin-top: 12px;
 }
 
 .sale-payment-hint {

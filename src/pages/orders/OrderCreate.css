@@ -68,19 +68,6 @@
   background-color: #da190b;
 }
 
-.item-info-box {
-  background: #e3f2fd;
-  border-left: 4px solid #2196F3;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.item-info-box div {
-  margin: 5px 0;
-}
-
 .order-totals {
   background: #fff3cd;
   border: 2px solid #ffc107;

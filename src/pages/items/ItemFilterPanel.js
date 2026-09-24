@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FilterActions from '../../components/FilterActions';
+import CatalogFilterFields from '../../components/CatalogFilterFields';
+import { ITEM_CONDITIONS } from './itemCondition';
 import './ItemFilterPanel.css';
 
 const ItemFilterPanel = ({
@@ -15,6 +17,9 @@ const ItemFilterPanel = ({
     date: currentFilters.date || '',
     dateFrom: currentFilters.dateFrom || '',
     dateTo: currentFilters.dateTo || '',
+    condition: currentFilters.condition || '',
+    companyId: currentFilters.companyId || '',
+    categoryId: currentFilters.categoryId || '',
   });
 
   const showTypeFilter = showStoreOption || showShopOption;
@@ -26,8 +31,11 @@ const ItemFilterPanel = ({
       date: currentFilters.date || '',
       dateFrom: currentFilters.dateFrom || '',
       dateTo: currentFilters.dateTo || '',
+      condition: currentFilters.condition || '',
+      companyId: currentFilters.companyId || '',
+      categoryId: currentFilters.categoryId || '',
     });
-  }, [currentFilters.filterType, currentFilters.search, currentFilters.date, currentFilters.dateFrom, currentFilters.dateTo]);
+  }, [currentFilters.filterType, currentFilters.search, currentFilters.date, currentFilters.dateFrom, currentFilters.dateTo, currentFilters.condition, currentFilters.companyId, currentFilters.categoryId]);
 
   useEffect(() => {
     if (filters.filterType === 'store' && !showStoreOption) {
@@ -67,6 +75,9 @@ const ItemFilterPanel = ({
       date: '',
       dateFrom: '',
       dateTo: '',
+      condition: '',
+      companyId: '',
+      categoryId: '',
     };
     setFilters(clearedFilters);
     onClear();
@@ -103,9 +114,26 @@ const ItemFilterPanel = ({
               name="search"
               value={filters.search}
               onChange={handleChange}
-              placeholder="Search by name..."
+              placeholder="Search name or unique ID"
               className="filter-input"
             />
+          </div>
+          <CatalogFilterFields filters={filters} onChange={handleChange} />
+          <div className="filter-field">
+            <label htmlFor="condition">Condition:</label>
+            <select
+              id="condition"
+              name="condition"
+              value={filters.condition}
+              onChange={handleChange}
+              className="filter-input"
+            >
+              <option value="">All items</option>
+              <option value="second_hand">Second-hand only</option>
+              {ITEM_CONDITIONS.map((entry) => (
+                <option key={entry.value} value={entry.value}>{entry.label}</option>
+              ))}
+            </select>
           </div>
           <div className="filter-field">
             <label htmlFor="date">Single Date:</label>

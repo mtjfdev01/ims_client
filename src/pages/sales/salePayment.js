@@ -1,3 +1,5 @@
+import { formatAmount } from '../../utils/formatAmount';
+
 export const PAYMENT_LABELS = {
   completed: 'Completed',
   pending: 'Pending',
@@ -30,7 +32,7 @@ export function money(value) {
 }
 
 export function moneyText(value) {
-  return money(value).toFixed(2);
+  return formatAmount(value);
 }
 
 export function todayIso() {
@@ -48,6 +50,7 @@ export function paymentLabel(status) {
 export function emptyPaymentForm() {
   return {
     customerId: '',
+    customerLabel: '',
     newCustomerName: '',
     newCustomerPhone: '',
     amountPaid: '',
@@ -57,15 +60,24 @@ export function emptyPaymentForm() {
   };
 }
 
+const customerDisplayLabel = (customer) => {
+  if (!customer) {
+    return '';
+  }
+  const extras = [customer.phone, customer.cnic].filter(Boolean);
+  return extras.length ? `${customer.name} (${extras.join(' · ')})` : customer.name;
+};
+
 export function paymentFormFromSale(sale) {
   return {
     customerId: sale?.customer?.id || '',
+    customerLabel: customerDisplayLabel(sale?.customer),
     newCustomerName: '',
     newCustomerPhone: '',
-    amountPaid: sale?.amountPaid == null ? '' : String(sale.amountPaid),
+    amountPaid: sale?.amountPaid == null ? '' : formatAmount(sale.amountPaid, ''),
     promiseDate: sale?.promiseDate || '',
     installmentFrequency: sale?.installmentFrequency || 'none',
-    installmentAmount: sale?.installmentAmount == null ? '' : String(sale.installmentAmount),
+    installmentAmount: sale?.installmentAmount == null ? '' : formatAmount(sale.installmentAmount, ''),
   };
 }
 

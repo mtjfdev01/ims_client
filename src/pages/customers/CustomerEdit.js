@@ -9,7 +9,7 @@ import { customersApi } from '../../services/api';
 const CustomerEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', notes: '' });
+  const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', notes: '', cnic: '' });
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
@@ -23,6 +23,7 @@ const CustomerEdit = () => {
           email: data.email || '',
           address: data.address || '',
           notes: data.notes || '',
+          cnic: data.cnic || '',
         });
       } catch (error) {
         console.error('Error loading customer:', error);
@@ -52,6 +53,7 @@ const CustomerEdit = () => {
         email: formData.email.trim() || null,
         address: formData.address.trim() || null,
         notes: formData.notes.trim() || null,
+        cnic: formData.cnic.trim() || null,
       });
       navigate('/customers');
     } catch (error) {
@@ -112,6 +114,18 @@ const CustomerEdit = () => {
               placeholder="Optional address"
               value={formData.address}
               onChange={handleChange}
+            />
+          </FormField>
+        </div>
+        <div className="form-fields-row">
+          <FormField label="CNIC" htmlFor="cnic">
+            <Input
+              type="text"
+              name="cnic"
+              placeholder="Optional CNIC"
+              value={formData.cnic}
+              onChange={handleChange}
+              maxLength={20}
             />
           </FormField>
         </div>

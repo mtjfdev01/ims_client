@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Listing from '../../components/Listing';
 import { storesApi, itemsApi } from '../../services/api';
 import { hasPermission } from '../../services/session';
+import { conditionLabel } from '../items/itemCondition';
+import { formatAmount } from '../../utils/formatAmount';
 import './StoreItems.css';
 
 const StoreItems = () => {
@@ -28,6 +30,8 @@ const StoreItems = () => {
 
   const columns = [
     { header: 'ID', accessor: 'id' },
+    { header: 'Unique ID', accessor: 'uniqueIdentifier', render: (value) => value || '—' },
+    { header: 'Condition', accessor: 'condition', render: (value) => conditionLabel(value) },
     { 
       header: 'Company', 
       accessor: 'company',
@@ -47,7 +51,7 @@ const StoreItems = () => {
     { 
       header: 'Purchase Price (per unit)', 
       accessor: 'purchasePrice',
-      render: (value) => typeof value === 'string' ? `${parseFloat(value).toFixed(2)}` : `${value?.toFixed(2) || '0.00'}`
+      render: (value) => formatAmount(value)
     },
     { 
       header: 'Total Value', 
@@ -57,13 +61,13 @@ const StoreItems = () => {
         const price = typeof row.purchasePrice === 'string' 
           ? parseFloat(row.purchasePrice) 
           : (row.purchasePrice || 0);
-        return `${(qty * price).toFixed(2)}`;
+        return formatAmount(qty * price);
       }
     },
     { 
       header: 'Min Sale Price', 
       accessor: 'minimumSalePrice',
-      render: (value) => typeof value === 'string' ? `${parseFloat(value).toFixed(2)}` : `${value?.toFixed(2) || '0.00'}`
+      render: (value) => formatAmount(value)
     },
     ...(hasPermission('issues') ? [{
       header: 'Stock Transfer',
@@ -97,7 +101,7 @@ const StoreItems = () => {
                   borderRadius: '4px',
                   fontWeight: 'bold'
                 }}>
-                  Asset Value: {assetValue.toFixed(2)}
+                  Asset Value: {formatAmount(assetValue)}
                 </div>
               )}
             </div>

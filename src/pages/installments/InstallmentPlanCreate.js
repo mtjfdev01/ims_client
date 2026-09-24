@@ -1,23 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../../components/Navigation';
 import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import RequireShop from '../../components/RequireShop';
-import { customersApi, installmentsApi, unwrapList } from '../../services/api';
+import { installmentsApi } from '../../services/api';
+import { CustomerSearchSelect } from '../../components/entitySearchSelects';
+import InlineCreatePanel from '../../components/InlineCreatePanel';
 import { money } from '../sales/salePayment';
 import '../sales/SaleCreate.css';
 
 const InstallmentPlanCreate = () => {
   const navigate = useNavigate();
-  const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     notes: '',
     totalAmount: '',
-    downPayment: '0',
+    downPayment: '',
     installmentCount: '3',
     schedule: 'first_of_month',
     dayOfMonth: '1',
@@ -26,12 +27,6 @@ const InstallmentPlanCreate = () => {
     newCustomerName: '',
     newCustomerPhone: '',
   });
-
-  useEffect(() => {
-    customersApi.getAll()
-      .then((data) => setCustomers(unwrapList(data)))
-      .catch(() => setCustomers([]));
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -100,14 +95,6 @@ const InstallmentPlanCreate = () => {
     }
   };
 
-  const customerOptions = [
-    { value: '', label: 'Select customer' },
-    ...customers.map((customer) => ({
-      value: customer.id,
-      label: customer.phone ? `${customer.name} (${customer.phone})` : customer.name,
-    })),
-  ];
-
   return (
     <div>
       <Navigation />
@@ -132,7 +119,7 @@ const InstallmentPlanCreate = () => {
                 type="number"
                 name="totalAmount"
                 min="0.01"
-                step="0.01"
+                step="any"
                 value={formData.totalAmount}
                 onChange={handleChange}
               />
@@ -140,36 +127,39 @@ const InstallmentPlanCreate = () => {
           </div>
           <div className="form-fields-row">
             <FormField label="Customer" htmlFor="customerId">
-              <Input
-                type="dropdown"
+              <CustomerSearchSelect
+                id="customerId"
                 name="customerId"
+                placeholder="Search customer"
+                emptyOption={{ value: '', label: 'Select customer' }}
                 value={formData.customerId}
                 onChange={handleChange}
-                options={customerOptions}
               />
             </FormField>
           </div>
           {!formData.customerId && (
-            <div className="form-fields-row">
-              <FormField label="Or add customer" htmlFor="newCustomerName">
-                <Input
-                  type="text"
-                  name="newCustomerName"
-                  placeholder="Customer name"
-                  value={formData.newCustomerName}
-                  onChange={handleChange}
-                />
-              </FormField>
-              <FormField label="Phone" htmlFor="newCustomerPhone">
-                <Input
-                  type="text"
-                  name="newCustomerPhone"
-                  placeholder="Optional phone"
-                  value={formData.newCustomerPhone}
-                  onChange={handleChange}
-                />
-              </FormField>
-            </div>
+            <InlineCreatePanel title="Add new customer">
+              <div className="form-fields-row">
+                <FormField label="Customer name" htmlFor="newCustomerName">
+                  <Input
+                    type="text"
+                    name="newCustomerName"
+                    placeholder="Customer name"
+                    value={formData.newCustomerName}
+                    onChange={handleChange}
+                  />
+                </FormField>
+                <FormField label="Phone" htmlFor="newCustomerPhone">
+                  <Input
+                    type="text"
+                    name="newCustomerPhone"
+                    placeholder="Optional phone"
+                    value={formData.newCustomerPhone}
+                    onChange={handleChange}
+                  />
+                </FormField>
+              </div>
+            </InlineCreatePanel>
           )}
           <div className="form-fields-row">
             <FormField label="Down payment" htmlFor="downPayment">
@@ -177,7 +167,7 @@ const InstallmentPlanCreate = () => {
                 type="number"
                 name="downPayment"
                 min="0"
-                step="0.01"
+                step="any"
                 value={formData.downPayment}
                 onChange={handleChange}
               />

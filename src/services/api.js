@@ -31,8 +31,12 @@ const apiCall = async (endpoint, options = {}) => {
     if (options.filters.paymentStatus) params.append('paymentStatus', options.filters.paymentStatus);
     if (options.filters.dueToday) params.append('dueToday', options.filters.dueToday);
     if (options.filters.customerId) params.append('customerId', options.filters.customerId);
+    if (options.filters.sellerId) params.append('sellerId', options.filters.sellerId);
     if (options.filters.kind) params.append('kind', options.filters.kind);
     if (options.filters.installmentStatus) params.append('installmentStatus', options.filters.installmentStatus);
+    if (options.filters.condition && options.filters.condition.trim()) params.append('condition', options.filters.condition.trim());
+    if (options.filters.companyId) params.append('companyId', options.filters.companyId);
+    if (options.filters.categoryId) params.append('categoryId', options.filters.categoryId);
   }
   
   if (options.storeId) params.append('storeId', options.storeId);
@@ -284,6 +288,27 @@ export const installmentsApi = {
   payDue: (id, data) => apiCall(`/installments/dues/${id}/pay`, { method: 'POST', body: data }),
 };
 
+export const sellersApi = {
+  getAll: (page, limit, filters) => {
+    const options = { page, limit, filters };
+    const shopId = resolveShopId(filters);
+    if (shopId) {
+      options.shopId = shopId;
+    }
+    return apiCall('/sellers', options);
+  },
+  getOne: (id) => apiCall(`/sellers/${id}`),
+  create: (data) => {
+    const shopId = getSelectedShopId();
+    if (shopId && !data.shopId) {
+      data.shopId = shopId;
+    }
+    return apiCall('/sellers', { method: 'POST', body: data });
+  },
+  update: (id, data) => apiCall(`/sellers/${id}`, { method: 'PATCH', body: data }),
+  delete: (id) => apiCall(`/sellers/${id}`, { method: 'DELETE' }),
+};
+
 export const customersApi = {
   getAll: (page, limit, filters) => {
     const options = { page, limit, filters };
@@ -343,6 +368,8 @@ export const purchasesApi = {
     if (filters?.dateTo) options.filters.dateTo = filters.dateTo;
     // Pass itemId as a separate option (not in filters)
     if (filters?.itemId) options.itemId = filters.itemId;
+    if (filters?.sellerId) options.filters.sellerId = filters.sellerId;
+    if (filters?.condition) options.filters.condition = filters.condition;
     return apiCall('/purchases', options);
   },
   getOne: (id) => apiCall(`/purchases/${id}`),
@@ -356,6 +383,8 @@ export const purchasesApi = {
     if (filters?.dateFrom) options.filters.dateFrom = filters.dateFrom;
     if (filters?.dateTo) options.filters.dateTo = filters.dateTo;
     if (filters?.itemId) options.itemId = filters.itemId;
+    if (filters?.sellerId) options.filters.sellerId = filters.sellerId;
+    if (filters?.condition) options.filters.condition = filters.condition;
     return apiCall('/purchases/totals', options);
   },
   create: (data) => {

@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../../components/Navigation';
 import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
-import { salesApi, itemsApi, customersApi, unwrapList } from '../../services/api';
+import { salesApi, itemsApi } from '../../services/api';
 import RequireShop from '../../components/RequireShop';
 import SalePaymentFields from './SalePaymentFields';
+import { ItemSearchSelect } from '../../components/entitySearchSelects';
 import { buildSalePaymentPayload, emptyPaymentForm, validatePaymentForm } from './salePayment';
+import { itemNameLabel, itemOptionLabel } from '../items/itemCondition';
+import { formatAmount } from '../../utils/formatAmount';
+import '../../components/ItemInfoBox.css';
 import './SaleCreate.css';
 
 const SaleCreate = () => {
@@ -16,78 +20,13 @@ const SaleCreate = () => {
     {
       itemId: '',
       quantity: 1,
-      amount: 0,
+      amount: '',
       profit: 0,
       selectedItem: null
     }
   ]);
-  const [items, setItems] = useState([]);
-  const [customers, setCustomers] = useState([]);
   const [payment, setPayment] = useState(emptyPaymentForm());
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    loadItems();
-    loadCustomers();
-  }, []);
-
-  const loadItems = async () => {
-    try {
-      // Get current user's shops
-      const userStr = localStorage.getItem('user');
-      let userShopIds = [];
-      
-      if (userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          // Extract shop IDs from user's shops array
-          if (user.shops && Array.isArray(user.shops)) {
-            userShopIds = user.shops.map(shop => shop.id);
-          }
-        } catch (e) {
-          console.error('Error parsing user from localStorage:', e);
-        }
-      }
-
-      const data = await itemsApi.getAll();
-      const itemsArray = Array.isArray(data) ? data : (data.data || []);
-      
-      // Filter to only show items that belong to shops (not stores)
-      let shopItems = itemsArray.filter(item => item.shop && !item.store);
-      
-      // Further filter to only show items from user's shops
-      if (userShopIds.length > 0) {
-        shopItems = shopItems.filter(item => 
-          item.shop && userShopIds.includes(item.shop.id)
-        );
-      }
-
-      const selectedShopStr = localStorage.getItem('selectedShop');
-      if (selectedShopStr) {
-        try {
-          const selectedShop = JSON.parse(selectedShopStr);
-          if (selectedShop?.id) {
-            shopItems = shopItems.filter(item => item.shop && item.shop.id === selectedShop.id);
-          }
-        } catch (e) {
-          console.error('Error parsing selected shop from localStorage:', e);
-        }
-      }
-      
-      setItems(shopItems);
-    } catch (error) {
-      console.error('Error loading items:', error);
-    }
-  };
-
-  const loadCustomers = async () => {
-    try {
-      const data = await customersApi.getAll();
-      setCustomers(unwrapList(data));
-    } catch (error) {
-      console.error('Error loading customers:', error);
-    }
-  };
 
   const loadItemDetails = async (itemId, index) => {
     try {
@@ -105,7 +44,7 @@ const SaleCreate = () => {
     if (!amount || !quantity || !purchasePrice) return 0;
     const totalCost = purchasePrice * quantity;
     const profit = amount - totalCost;
-    return parseFloat(profit.toFixed(2));
+    return Number(formatAmount(profit));
   };
 
   const calculateItemProfit = (index) => {
@@ -123,14 +62,12 @@ const SaleCreate = () => {
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...saleItems];
-    updatedItems[index][field] = field === 'quantity' || field === 'amount' 
-      ? (parseFloat(value) || 0) 
-      : value;
+    updatedItems[index][field] = value;
 
     if (field === 'itemId') {
       updatedItems[index].selectedItem = null;
       updatedItems[index].profit = 0;
-      updatedItems[index].amount = 0;
+      updatedItems[index].amount = '';
       setSaleItems(updatedItems);
       if (value) {
         loadItemDetails(value, index);
@@ -149,7 +86,7 @@ const SaleCreate = () => {
       {
         itemId: '',
         quantity: 1,
-        amount: 0,
+        amount: '',
         profit: 0,
         selectedItem: null
       }
@@ -220,13 +157,8 @@ const SaleCreate = () => {
     }
   };
 
-  const itemOptions = items.map(item => ({ 
-    value: item.id, 
-    label: item.name ? `${item.name} (ID: ${item.id}, Qty: ${item.quantity})` : `Item #${item.id} (Qty: ${item.quantity})` 
-  }));
-
   return (
-    <div>
+    <div className="sale-create-page">
       <Navigation />
       <RequireShop block>
       <FormWrapper title="Create Sale" onSubmit={handleSubmit}>
@@ -255,13 +187,14 @@ const SaleCreate = () => {
 
               <div className="form-fields-row">
                 <FormField label="Item" htmlFor={`item-${index}`} required>
-                  <Input
-                    type="dropdown"
+                  <ItemSearchSelect
+                    id={`item-${index}`}
                     name="itemId"
-                    placeholder="Select Item"
+                    shopOnly
+                    placeholder="Search item"
                     value={saleItem.itemId}
+                    selectedLabel={saleItem.selectedItem ? itemNameLabel(saleItem.selectedItem) : undefined}
                     onChange={(e) => handleItemChange(index, 'itemId', e.target.value)}
-                    options={itemOptions}
                   />
                 </FormField>
                 <FormField label="Quantity" htmlFor={`quantity-${index}`} required>
@@ -279,13 +212,10 @@ const SaleCreate = () => {
 
               {saleItem.selectedItem && (
                 <div className="item-info-box">
-                  <div><strong>Item:</strong> {saleItem.selectedItem.name || `Item #${saleItem.selectedItem.id}`}</div>
-                  <div><strong>Available Quantity:</strong> {saleItem.selectedItem.quantity}</div>
-                  <div><strong>FIFO Cost (next out):</strong> {typeof saleItem.selectedItem.purchasePrice === 'string' 
-                    ? parseFloat(saleItem.selectedItem.purchasePrice).toFixed(2) 
-                    : (saleItem.selectedItem.purchasePrice?.toFixed(2) || '0.00')}
-                  </div>
-                  <div>Profit is estimated from FIFO cost and finalized on save.</div>
+                  <span className="item-info-stat"><strong>Item</strong> {itemOptionLabel(saleItem.selectedItem)}</span>
+                  <span className="item-info-stat"><strong>Available</strong> {saleItem.selectedItem.quantity}</span>
+                  <span className="item-info-stat"><strong>FIFO cost</strong> {formatAmount(saleItem.selectedItem.purchasePrice)}</span>
+                  <span className="item-info-hint">Profit is estimated from FIFO cost and finalized on save.</span>
                 </div>
               )}
 
@@ -297,7 +227,7 @@ const SaleCreate = () => {
                     placeholder="Amount"
                     value={saleItem.amount}
                     onChange={(e) => handleItemChange(index, 'amount', e.target.value)}
-                    step="0.01"
+                    step="any"
                     min="0"
                   />
                 </FormField>
@@ -308,7 +238,7 @@ const SaleCreate = () => {
                     placeholder="Profit (Auto-calculated)"
                     value={saleItem.profit || 0}
                     disabled={true}
-                    step="0.01"
+                    step="any"
                   />
                 </FormField>
               </div>
@@ -318,16 +248,15 @@ const SaleCreate = () => {
 
         <div className="sale-totals">
           <div className="total-row">
-            <strong>Total Amount:</strong> {totalAmount.toFixed(2)}
+            <strong>Amount</strong> {formatAmount(totalAmount)}
           </div>
           <div className="total-row">
-            <strong>Total Profit:</strong> {totalProfit.toFixed(2)}
+            <strong>Profit</strong> {formatAmount(totalProfit)}
           </div>
         </div>
 
         <SalePaymentFields
           totalAmount={totalAmount}
-          customers={customers}
           value={payment}
           onChange={setPayment}
         />

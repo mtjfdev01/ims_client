@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Input from '../../components/Input';
 import FilterActions from '../../components/FilterActions';
-import { itemsApi } from '../../services/api';
+import { ItemSearchSelect, SellerSearchSelect } from '../../components/entitySearchSelects';
+import { hasPermission } from '../../services/session';
+import { ITEM_CONDITIONS } from '../items/itemCondition';
 import './PurchaseFilterPanel.css';
 
 const emptyFilters = {
@@ -9,22 +11,18 @@ const emptyFilters = {
   dateFrom: '',
   dateTo: '',
   itemId: '',
+  sellerId: '',
+  condition: '',
 };
 
 const PurchaseFilterPanel = ({ onApplyFilters, onFilterChange, onClear, currentFilters = {} }) => {
   const applyFilters = onFilterChange || onApplyFilters;
   const [filters, setFilters] = useState({ ...emptyFilters, ...currentFilters });
-  const [items, setItems] = useState([]);
+  const canUseSellers = hasPermission('sellers');
 
   useEffect(() => {
     setFilters({ ...emptyFilters, ...currentFilters });
-  }, [currentFilters.date, currentFilters.dateFrom, currentFilters.dateTo, currentFilters.itemId]);
-
-  useEffect(() => {
-    itemsApi.getAll()
-      .then((data) => setItems(Array.isArray(data) ? data : (data.data || [])))
-      .catch(() => setItems([]));
-  }, []);
+  }, [currentFilters.date, currentFilters.dateFrom, currentFilters.dateTo, currentFilters.itemId, currentFilters.sellerId, currentFilters.condition]);
 
   const emit = (next) => {
     setFilters(next);
@@ -55,11 +53,6 @@ const PurchaseFilterPanel = ({ onApplyFilters, onFilterChange, onClear, currentF
     }
   };
 
-  const itemOptions = items.map((item) => ({
-    value: item.id,
-    label: item.name ? `${item.name} (ID: ${item.id})` : `Item #${item.id}`,
-  }));
-
   return (
     <div className="filter-panel">
       <div className="filter-panel-header">
@@ -69,13 +62,44 @@ const PurchaseFilterPanel = ({ onApplyFilters, onFilterChange, onClear, currentF
         <div className="filter-row">
           <div className="filter-field">
             <label htmlFor="itemId">Item:</label>
-            <Input
-              type="dropdown"
+            <ItemSearchSelect
+              id="itemId"
               name="itemId"
+              shopOnly
+              placeholder="Search item"
+              emptyOption={{ value: '', label: 'All Items' }}
               value={filters.itemId}
               onChange={handleChange}
-              options={[{ value: '', label: 'All Items' }, ...itemOptions]}
             />
+          </div>
+          {canUseSellers && (
+            <div className="filter-field">
+              <label htmlFor="sellerId">Seller:</label>
+              <SellerSearchSelect
+                id="sellerId"
+                name="sellerId"
+                placeholder="Search seller"
+                emptyOption={{ value: '', label: 'All Sellers' }}
+                value={filters.sellerId}
+                onChange={handleChange}
+              />
+            </div>
+          )}
+          <div className="filter-field">
+            <label htmlFor="condition">Condition:</label>
+            <select
+              id="condition"
+              name="condition"
+              value={filters.condition}
+              onChange={handleChange}
+              className="filter-input"
+            >
+              <option value="">All items</option>
+              <option value="second_hand">Second-hand only</option>
+              {ITEM_CONDITIONS.map((entry) => (
+                <option key={entry.value} value={entry.value}>{entry.label}</option>
+              ))}
+            </select>
           </div>
           <div className="filter-field">
             <label htmlFor="date">Specific Date:</label>

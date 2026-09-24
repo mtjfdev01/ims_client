@@ -67,6 +67,7 @@ const HOME_PATHS = [
   ['services', '/services'],
   ['installments', '/installments'],
   ['customers', '/customers'],
+  ['sellers', '/sellers'],
   ['items', '/items'],
   ['issues', '/stock-transfers'],
   ['categories', '/categories'],

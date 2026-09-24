@@ -1,0 +1,24 @@
+.collapse-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.28s ease, opacity 0.22s ease, margin-top 0.28s ease;
+}
+
+.collapse-body.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.collapse-body-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.collapse-body.is-open > .collapse-body-inner {
+  overflow: visible;
+}
+
+.collapse-body:not(.is-open) {
+  pointer-events: none;
+}

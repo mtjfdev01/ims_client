@@ -61,6 +61,12 @@ import CustomerCreate from './pages/customers/CustomerCreate';
 import CustomerView from './pages/customers/CustomerView';
 import CustomerEdit from './pages/customers/CustomerEdit';
 
+// Sellers
+import SellerList from './pages/sellers/SellerList';
+import SellerCreate from './pages/sellers/SellerCreate';
+import SellerView from './pages/sellers/SellerView';
+import SellerEdit from './pages/sellers/SellerEdit';
+
 // Installments
 import InstallmentList from './pages/installments/InstallmentList';
 import InstallmentPlanCreate from './pages/installments/InstallmentPlanCreate';
@@ -187,6 +193,12 @@ function App() {
           <Route path="/customers/create" element={<RequirePermission permission="customers.write"><CustomerCreate /></RequirePermission>} />
           <Route path="/customers/:id" element={<RequirePermission permission="customers.read"><CustomerView /></RequirePermission>} />
           <Route path="/customers/:id/edit" element={<RequirePermission permission="customers.write"><CustomerEdit /></RequirePermission>} />
+
+          {/* Sellers Routes */}
+          <Route path="/sellers" element={<RequirePermission permission="sellers.read"><SellerList /></RequirePermission>} />
+          <Route path="/sellers/create" element={<RequirePermission permission="sellers.write"><SellerCreate /></RequirePermission>} />
+          <Route path="/sellers/:id" element={<RequirePermission permission="sellers.read"><SellerView /></RequirePermission>} />
+          <Route path="/sellers/:id/edit" element={<RequirePermission permission="sellers.write"><SellerEdit /></RequirePermission>} />
 
           {/* Services Routes */}
           <Route path="/services" element={<RequirePermission permission="services.read"><ServiceList /></RequirePermission>} />

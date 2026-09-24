@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navigation from '../../components/Navigation';
+import Input from '../../components/Input';
 import PermissionLink from '../../components/PermissionLink';
 import { servicesApi } from '../../services/api';
 import { FREQUENCY_LABELS, money, moneyText, paymentLabel, SERVICE_KIND_LABELS, todayIso } from '../sales/salePayment';
@@ -212,10 +213,11 @@ const ServiceView = () => {
             <div className="form-fields-row">
               <label>
                 Amount
-                <input
+                <Input
                   type="number"
-                  min="0.01"
-                  step="0.01"
+                  name="amount"
+                  min="0"
+                  step="any"
                   max={remaining}
                   value={paymentForm.amount}
                   onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CollapseBody from './CollapseBody';
 import './CollapsibleFilters.css';
 
 const CollapsibleFilters = ({ title = 'Filters', children }) => {
@@ -15,11 +16,9 @@ const CollapsibleFilters = ({ title = 'Filters', children }) => {
         <span>{title}</span>
         <span className="collapsible-filters-toggle-label">{open ? 'Hide' : 'Show'}</span>
       </button>
-      {open && (
-        <div className="collapsible-filters-body">
-          {children}
-        </div>
-      )}
+      <CollapseBody open={open} className="collapsible-filters-body">
+        {children}
+      </CollapseBody>
     </div>
   );
 };

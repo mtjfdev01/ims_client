@@ -4,7 +4,8 @@ import Navigation from '../../components/Navigation';
 import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
-import { issuesApi, itemsApi, shopsApi, storesApi, unwrapList } from '../../services/api';
+import { issuesApi, shopsApi, storesApi, unwrapList } from '../../services/api';
+import { ItemSearchSelect } from '../../components/entitySearchSelects';
 
 const StockTransferCreate = () => {
   const navigate = useNavigate();
@@ -17,19 +18,17 @@ const StockTransferCreate = () => {
     quantity: 1,
     notes: '',
   });
-  const [items, setItems] = useState([]);
   const [shops, setShops] = useState([]);
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    itemsApi.getAll().then((result) => setItems(unwrapList(result))).catch(() => setItems([]));
     shopsApi.getAll().then((result) => setShops(unwrapList(result))).catch(() => setShops([]));
     storesApi.getAll().then((result) => setStores(unwrapList(result))).catch(() => setStores([]));
   }, []);
 
   const handleChange = (e) => {
-    const value = e.target.type === 'number' ? parseInt(e.target.value, 10) || 0 : e.target.value;
+    const value = e.target.value;
     setFormData((prev) => ({ ...prev, [e.target.name]: value }));
   };
 
@@ -66,10 +65,6 @@ const StockTransferCreate = () => {
     }
   };
 
-  const itemOptions = items.map((item) => ({
-    value: item.id,
-    label: item.name ? `${item.name} (ID: ${item.id})` : `Item #${item.id}`,
-  }));
   const shopOptions = shops.map((shop) => ({ value: shop.id, label: shop.name }));
   const storeOptions = stores.map((store) => ({ value: store.id, label: store.name }));
   const fromOptions = formData.fromType === 'store' ? storeOptions : shopOptions;
@@ -80,13 +75,12 @@ const StockTransferCreate = () => {
       <Navigation />
       <FormWrapper title="Create Stock Transfer" onSubmit={handleSubmit}>
         <FormField label="Item" htmlFor="itemId" required>
-          <Input
-            type="dropdown"
+          <ItemSearchSelect
+            id="itemId"
             name="itemId"
-            placeholder="Select item"
+            placeholder="Search item"
             value={formData.itemId}
             onChange={handleChange}
-            options={itemOptions}
           />
         </FormField>
         <div className="form-fields-row">

@@ -1,6 +1,7 @@
 import React from 'react';
 import Listing from '../../components/Listing';
 import { ordersApi } from '../../services/api';
+import { formatAmount } from '../../utils/formatAmount';
 import FilterPanel from '../../components/FilterPanel';
 
 const OrderList = () => {
@@ -29,9 +30,7 @@ const OrderList = () => {
     { 
       header: 'Total Amount', 
       accessor: 'totalAmount',
-      render: (value) => typeof value === 'string' 
-        ? `${parseFloat(value).toFixed(2)}` 
-        : `${value?.toFixed(2) || '0.00'}`
+      render: (value) => formatAmount(value)
     },
     { 
       header: 'Date', 

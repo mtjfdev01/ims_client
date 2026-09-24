@@ -9,6 +9,7 @@ import { hasPermission } from '../services/session';
 import { clearListingState, compactFilters, readListingState, writeListingState } from '../services/listingFilters';
 import { useShop } from '../contexts/ShopContext';
 import { getViewTenantId } from '../services/session';
+import { formatAmount } from '../utils/formatAmount';
 import './Listing.css';
 
 const Listing = ({
@@ -246,11 +247,7 @@ const Listing = ({
           <div className="listing-totals">
             {totalsConfig.map((config, index) => {
               const value = totals[config.key];
-              const displayValue = typeof value === 'number'
-                ? (config.format === 'currency'
-                  ? `${value.toFixed(2)}`
-                  : value.toFixed(config.decimals || 2))
-                : value || '0.00';
+              const displayValue = formatAmount(value);
               return (
                 <div key={index} className="total-item">
                   <span className="total-label">{config.label}:</span>

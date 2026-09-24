@@ -2,6 +2,8 @@ import React from 'react';
 import SingleView from '../../components/SingleView';
 import PermissionLink from '../../components/PermissionLink';
 import { itemsApi } from '../../services/api';
+import { conditionLabel } from './itemCondition';
+import { formatAmount } from '../../utils/formatAmount';
 
 const ItemView = () => {
   const fields = [
@@ -35,6 +37,8 @@ const ItemView = () => {
         : (value?.name || 'N/A')
     },
     { label: 'Location', accessor: 'location' },
+    { label: 'Unique Identifier', accessor: 'uniqueIdentifier', render: (value) => value || '—' },
+    { label: 'Condition / Grade', accessor: 'condition', render: (value) => conditionLabel(value) },
     { 
       label: 'Quantity', 
       accessor: 'quantity',
@@ -43,20 +47,20 @@ const ItemView = () => {
     { 
       label: 'FIFO Cost (next out)', 
       accessor: 'purchasePrice',
-      render: (value) => typeof value === 'string' ? `${parseFloat(value).toFixed(2)}` : `${value?.toFixed(2) || '0.00'}`
+      render: (value) => formatAmount(value)
     },
     { 
       label: 'Stock Value (FIFO)', 
       accessor: 'fifoValue',
       render: (value, row) => {
         if (typeof value === 'number') {
-          return value.toFixed(2);
+          return formatAmount(value);
         }
         const qty = row.quantity ?? 0;
         const price = typeof row.purchasePrice === 'string' 
           ? parseFloat(row.purchasePrice) 
           : (row.purchasePrice || 0);
-        return `${(qty * price).toFixed(2)}`;
+        return formatAmount(qty * price);
       }
     },
     { 
@@ -80,7 +84,7 @@ const ItemView = () => {
                 <tr key={lot.id}>
                   <td>{lot.receivedAt ? new Date(lot.receivedAt).toLocaleDateString() : 'N/A'}</td>
                   <td>{lot.remainingQuantity}</td>
-                  <td>{Number(lot.unitCost).toFixed(2)}</td>
+                  <td>{formatAmount(lot.unitCost)}</td>
                 </tr>
               ))}
             </tbody>
@@ -91,7 +95,7 @@ const ItemView = () => {
     { 
       label: 'Minimum Sale Price', 
       accessor: 'minimumSalePrice',
-      render: (value) => typeof value === 'string' ? `${parseFloat(value).toFixed(2)}` : `${value?.toFixed(2) || '0.00'}`
+      render: (value) => formatAmount(value)
     },
   ];
 

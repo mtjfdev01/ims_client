@@ -1,0 +1,36 @@
+.inline-create-panel {
+  width: 100%;
+  margin: 8px 0 4px;
+  padding: 10px 12px;
+  border: 1px dashed #c5d8f5;
+  border-radius: 6px;
+  background: #f8fbff;
+}
+
+.inline-create-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.inline-create-toggle-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4CAF50;
+}
+
+.inline-create-body {
+  margin-top: 0;
+}
+
+.inline-create-body.is-open {
+  margin-top: 10px;
+}

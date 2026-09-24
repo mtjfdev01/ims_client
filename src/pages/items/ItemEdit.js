@@ -5,6 +5,7 @@ import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import { itemsApi, companiesApi, categoriesApi, storesApi, shopsApi, unwrapList } from '../../services/api';
+import { ITEM_CONDITIONS } from './itemCondition';
 
 const ItemEdit = () => {
   const navigate = useNavigate();
@@ -16,9 +17,11 @@ const ItemEdit = () => {
     storeId: '',
     shopId: '',
     location: '',
+    uniqueIdentifier: '',
+    condition: '',
     quantity: 1,
-    purchasePrice: 0,
-    minimumSalePrice: 0
+    purchasePrice: '',
+    minimumSalePrice: ''
   });
   const [companies, setCompanies] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -46,6 +49,8 @@ const ItemEdit = () => {
         categories: data.categories?.map(c => c.id || c) || data.categories || [],
         storeId: data.store?.id || data.storeId || '',
         shopId: data.shop?.id || data.shopId || '',
+        uniqueIdentifier: data.uniqueIdentifier || '',
+        condition: data.condition || '',
         quantity: data.quantity ?? 0
       });
     } catch (error) {
@@ -114,17 +119,10 @@ const ItemEdit = () => {
         shopId: value,
         storeId: '' // Clear store when shop is selected
       });
-    } else if (e.target.name === 'quantity') {
-      const value = parseInt(e.target.value, 10);
-      setFormData({
-        ...formData,
-        quantity: Number.isNaN(value) ? 0 : value
-      });
     } else {
-      const value = e.target.type === 'number' ? parseFloat(e.target.value) : e.target.value;
       setFormData({
         ...formData,
-        [e.target.name]: value
+        [e.target.name]: e.target.value
       });
     }
   };
@@ -155,6 +153,8 @@ const ItemEdit = () => {
         storeId: formData.storeId && formData.storeId !== '' ? parseInt(formData.storeId) : undefined,
         shopId: formData.shopId && formData.shopId !== '' ? parseInt(formData.shopId) : undefined,
         location: formData.location || '',
+        uniqueIdentifier: formData.uniqueIdentifier?.trim() || null,
+        condition: formData.condition || null,
         quantity: formData.quantity ?? 0,
         purchasePrice: formData.purchasePrice || 0,
         minimumSalePrice: formData.minimumSalePrice || 0
@@ -163,7 +163,7 @@ const ItemEdit = () => {
       navigate('/items');
     } catch (error) {
       console.error('Error updating item:', error);
-      alert('Failed to update item');
+      alert(error.message || 'Failed to update item');
       setLoading(false);
     }
   };
@@ -232,6 +232,25 @@ const ItemEdit = () => {
           </FormField>
         </div>
         <div className="form-fields-row">
+          <FormField label="Unique Identifier (optional)" htmlFor="uniqueIdentifier">
+            <Input
+              type="text"
+              name="uniqueIdentifier"
+              placeholder="IMEI, serial, tag, chassis..."
+              value={formData.uniqueIdentifier}
+              onChange={handleChange}
+            />
+          </FormField>
+          <FormField label="Condition / Grade (optional)" htmlFor="condition">
+            <select id="condition" name="condition" value={formData.condition} onChange={handleChange}>
+              <option value="">Not set</option>
+              {ITEM_CONDITIONS.map((entry) => (
+                <option key={entry.value} value={entry.value}>{entry.label}</option>
+              ))}
+            </select>
+          </FormField>
+        </div>
+        <div className="form-fields-row">
           <FormField label="Store (optional)" htmlFor="storeId">
             <Input
               type="dropdown"
@@ -271,7 +290,7 @@ const ItemEdit = () => {
               placeholder="Purchase Price (per unit)"
               value={formData.purchasePrice}
               onChange={handleChange}
-              step="0.01"
+              step="any"
             />
           </FormField>
         </div>

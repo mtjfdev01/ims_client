@@ -5,6 +5,8 @@ import FormWrapper from '../../components/FormWrapper';
 import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import { itemsApi, storesApi, shopsApi } from '../../services/api';
+import { itemOptionLabel } from './itemCondition';
+import '../../components/ItemInfoBox.css';
 import '../FormPage.css';
 
 const TransferItem = () => {
@@ -90,12 +92,9 @@ const TransferItem = () => {
 
   const handleChange = (e) => {
     if (e.target.name === 'quantity') {
-      const value = parseInt(e.target.value) || 1;
-      const maxQuantity = itemData?.quantity || 1;
-      const finalValue = Math.min(Math.max(1, value), maxQuantity);
       setFormData({
         ...formData,
-        quantity: finalValue
+        quantity: e.target.value
       });
     } else {
       const value = e.target.value;
@@ -168,13 +167,13 @@ const TransferItem = () => {
     <div>
       <Navigation />
       <FormWrapper title="Stock Transfer" onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#f0f0f0', borderRadius: '4px' }}>
-          <div><strong>Item ID:</strong> {formData.itemId}</div>
+        <div className="item-info-box">
+          <span className="item-info-stat"><strong>Item</strong> {itemData ? itemOptionLabel(itemData) : 'Item'}</span>
           {itemData && (
-            <div style={{ marginTop: '8px' }}>
-              <strong>Available Quantity:</strong> {itemData.quantity || 0} units
-              {itemData.company && <div><strong>Company:</strong> {itemData.company.name}</div>}
-            </div>
+            <span className="item-info-stat"><strong>Available</strong> {itemData.quantity || 0}</span>
+          )}
+          {itemData?.company && (
+            <span className="item-info-stat"><strong>Company</strong> {itemData.company.name}</span>
           )}
         </div>
         

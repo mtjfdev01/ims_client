@@ -6,6 +6,7 @@ import FormField from '../../components/FormField';
 import Input from '../../components/Input';
 import { issuesApi } from '../../services/api';
 import { locationLabel } from './locationLabel';
+import { itemOptionLabel } from '../items/itemCondition';
 
 const StockTransferEdit = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const StockTransferEdit = () => {
           quantity: row.quantity || 1,
           notes: row.notes || '',
         });
-        setSummary(`${row.item?.name || `Item #${row.item?.id || '—'}`} · ${locationLabel(row.fromShop, row.fromStore)} → ${locationLabel(row.toShop, row.toStore)}`);
+        setSummary(`${itemOptionLabel(row.item)} · ${locationLabel(row.fromShop, row.fromStore)} → ${locationLabel(row.toShop, row.toStore)}`);
       } catch (error) {
         alert(error.message || 'Failed to load stock transfer');
       } finally {
@@ -37,7 +38,7 @@ const StockTransferEdit = () => {
   }, [id]);
 
   const handleChange = (e) => {
-    const value = e.target.type === 'number' ? parseInt(e.target.value, 10) || 0 : e.target.value;
+    const value = e.target.value;
     setFormData((prev) => ({ ...prev, [e.target.name]: value }));
   };
 

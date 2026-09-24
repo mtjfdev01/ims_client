@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navigation from '../../components/Navigation';
+import Input from '../../components/Input';
 import PermissionLink from '../../components/PermissionLink';
 import { installmentsApi } from '../../services/api';
 import { DUE_LABELS, money, moneyText, paymentLabel, todayIso } from '../sales/salePayment';
@@ -200,10 +201,11 @@ const InstallmentPlanView = () => {
             <div className="form-fields-row">
               <label>
                 Amount
-                <input
+                <Input
                   type="number"
-                  min="0.01"
-                  step="0.01"
+                  name="amount"
+                  min="0"
+                  step="any"
                   value={payForm.amount}
                   onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })}
                   required

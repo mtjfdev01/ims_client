@@ -31,6 +31,7 @@ const NavIcon = ({ name }) => {
     services: 'M21 7.5 12 2 3 7.5V21h7v-6h4v6h7z',
     installments: 'M7 3h10v3H7zm-3 5h16v13H4zm4 3h8v2H8z',
     customers: 'M8 11a3.5 3.5 0 1 0-3.5-3.5A3.5 3.5 0 0 0 8 11zm8 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3zM2 20v-1.4A5.4 5.4 0 0 1 8 13a5.3 5.3 0 0 1 4.6 2.6A4.7 4.7 0 0 1 16 13a4.8 4.8 0 0 1 6 5.6V20z',
+    sellers: 'M12 7a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm-7 14v-1.3A6.3 6.3 0 0 1 12 13a6.3 6.3 0 0 1 7 6.7V21zM4 11h16v2H4z',
     items: 'M4 7 12 3l8 4-8 4-8-4zm0 5 8 4 8-4M4 17l8 4 8-4',
     transfers: 'M7 7h11l-3-3 1.4-1.4L21.8 8 16.4 13.4 15 12l3-3H7zm10 10H6l3 3-1.4 1.4L2.2 16 7.6 10.6 9 12l-3 3h11z',
     categories: 'M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z',
@@ -111,6 +112,7 @@ const Navigation = () => {
           { path: '/services', label: 'Services', module: 'services', icon: 'services' },
           { path: '/installments', label: 'Installments', module: 'installments', icon: 'installments' },
           { path: '/customers', label: 'Customers', module: 'customers', icon: 'customers' },
+          { path: '/sellers', label: 'Sellers', module: 'sellers', icon: 'sellers' },
         ],
       },
       {

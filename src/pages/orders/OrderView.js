@@ -1,6 +1,8 @@
 import React from 'react';
 import SingleView from '../../components/SingleView';
 import { ordersApi } from '../../services/api';
+import { formatAmount } from '../../utils/formatAmount';
+import { itemOptionLabel } from '../items/itemCondition';
 import './OrderView.css';
 
 const OrderView = () => {
@@ -21,9 +23,7 @@ const OrderView = () => {
     { 
       label: 'Total Amount', 
       accessor: 'totalAmount',
-      render: (value) => typeof value === 'string' 
-        ? `${parseFloat(value).toFixed(2)}` 
-        : `${value?.toFixed(2) || '0.00'}`
+      render: (value) => formatAmount(value)
     },
     { 
       label: 'Date', 
@@ -61,17 +61,12 @@ const OrderView = () => {
                   return (
                     <tr key={index}>
                       <td>
-                        {orderItem.item?.name 
-                          ? `${orderItem.item.name} (ID: ${orderItem.item.id})` 
-                          : `Item #${orderItem.item?.id || orderItem.itemId || 'N/A'}`}
+                        {itemOptionLabel(orderItem.item)}
                       </td>
                       <td>{issuedQty}</td>
                       <td>{returnedQty}</td>
                       <td>{netQty}</td>
-                      <td>{typeof orderItem.amount === 'string' 
-                        ? parseFloat(orderItem.amount).toFixed(2) 
-                        : (orderItem.amount?.toFixed(2) || '0.00')}
-                      </td>
+                      <td>{formatAmount(orderItem.amount)}</td>
                     </tr>
                   );
                 })}

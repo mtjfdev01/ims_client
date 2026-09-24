@@ -4,6 +4,8 @@ import ItemFilterPanel from './ItemFilterPanel';
 import { itemsApi } from '../../services/api';
 import { useShop } from '../../contexts/ShopContext';
 import { getAssignedShops, getUser, isSuperAdmin, isTenantAdmin } from '../../services/session';
+import { conditionLabel } from './itemCondition';
+import { formatAmount } from '../../utils/formatAmount';
 
 const ItemList = () => {
   const { selectedShop } = useShop();
@@ -13,6 +15,8 @@ const ItemList = () => {
   const showStoreOption = canSeeAllTypes;
   const columns = [
     { header: 'Name', accessor: 'name' },
+    { header: 'Unique ID', accessor: 'uniqueIdentifier', render: (value) => value || '—' },
+    { header: 'Condition', accessor: 'condition', render: (value) => conditionLabel(value) },
     { 
       header: 'Company', 
       accessor: 'company',
@@ -44,7 +48,7 @@ const ItemList = () => {
     { 
       header: 'FIFO Cost (next out)', 
       accessor: 'purchasePrice',
-      render: (value) => typeof value === 'string' ? `${parseFloat(value).toFixed(2)}` : `${value?.toFixed(2) || '0.00'}`
+      render: (value) => formatAmount(value)
     },
     { 
       header: 'Total Value', 
@@ -54,13 +58,13 @@ const ItemList = () => {
         const price = typeof row.purchasePrice === 'string' 
           ? parseFloat(row.purchasePrice) 
           : (row.purchasePrice || 0);
-        return `${(qty * price).toFixed(2)}`;
+        return formatAmount(qty * price);
       }
     },
     { 
       header: 'Min Sale Price', 
       accessor: 'minimumSalePrice',
-      render: (value) => typeof value === 'string' ? `${parseFloat(value).toFixed(2)}` : `${value?.toFixed(2) || '0.00'}`
+      render: (value) => formatAmount(value)
     },
   ];
 

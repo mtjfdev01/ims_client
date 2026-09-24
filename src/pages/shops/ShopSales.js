@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Listing from '../../components/Listing';
 import { salesApi, shopsApi } from '../../services/api';
+import { itemOptionLabel } from '../items/itemCondition';
 import './ShopSales.css';
 
 const ShopSales = () => {
@@ -23,7 +24,7 @@ const ShopSales = () => {
 
   const columns = [
     { header: 'ID', accessor: 'id' },
-    { header: 'Item ID', accessor: 'item' },
+    { header: 'Item', accessor: 'item', render: (value) => itemOptionLabel(value) },
     { header: 'Quantity', accessor: 'quantity' },
     { header: 'Profit', accessor: 'profit' },
     { header: 'Amount', accessor: 'amount' },
